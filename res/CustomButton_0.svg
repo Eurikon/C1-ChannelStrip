@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 75% scaled version of VCVButton_0.svg (13.5px x 13.5px) - Broken white color scheme -->
+<svg version="1.0" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+     x="0px" y="0px" width="13.5px" height="13.5px" viewBox="0 0 13.5 13.5" xml:space="preserve">
+<g transform="scale(0.75)">
+<g id="g5959-5_67_" transform="translate(301.93513,1189.951)">
+	<path id="path5961-3_67_" d="M-283.93512-1180.95044c0,4.97021-4.03055,8.99939-9.00067,8.99939
+		c-4.96945,0-8.99933-4.02917-8.99933-8.99939c0-4.97217,4.02988-9.00061,8.99933-9.00061
+		C-287.96567-1189.95105-283.93512-1185.92261-283.93512-1180.95044"/>
+</g>
+<g id="g5959-5_66_" transform="translate(301.93513,1189.951)">
+	<linearGradient id="path5961-3_1_" gradientUnits="userSpaceOnUse" x1="-590.61273" y1="-2201.38525" x2="-574.11816" y2="-2201.38525" gradientTransform="matrix(-3.267949e-07 1 -1 -3.267949e-07 -2494.32056 -598.5863)">
+		<stop  offset="0" style="stop-color:#F4F0E8"/>
+		<stop  offset="1" style="stop-color:#A09C94"/>
+	</linearGradient>
+	<path id="path5961-3_66_" fill="url(#path5961-3_1_)" d="M-301.1824-1180.95166
+		c0-4.55444,3.69345-8.2467,8.24789-8.2467c4.55383,0,8.24667,3.69226,8.24667,8.2467c0,4.55627-3.69284,8.24792-8.24667,8.24792
+		C-297.48895-1172.70374-301.1824-1176.39539-301.1824-1180.95166"/>
+</g>
+<g id="g5959-5_65_" transform="translate(301.93513,1189.951)">
+	<linearGradient id="path5961-3_2_" gradientUnits="userSpaceOnUse" x1="844.57037" y1="-5065.53271" x2="859.31799" y2="-5065.53271" gradientTransform="matrix(6.123234e-17 1 -1 6.123234e-17 -5358.46777 -2032.89526)">
+		<stop  offset="0.00559" style="stop-color:#E8E4DC"/>
+		<stop  offset="1" style="stop-color:#949088"/>
+	</linearGradient>
+	<path id="path5961-3_65_" fill="url(#path5961-3_2_)" d="M-292.93457-1188.32483
+		c4.07211,0,7.37326,3.30225,7.37326,7.37427c0,4.07153-3.30115,7.37329-7.37326,7.37329
+		c-4.07376,0-7.37436-3.30176-7.37436-7.37329C-300.30893-1185.02258-297.00833-1188.32483-292.93457-1188.32483"/>
+</g>
+</g>
+</svg>

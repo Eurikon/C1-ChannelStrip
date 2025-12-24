@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="40.64mm" height="128.5mm" viewBox="0 0 40.64 128.5">
+  <!-- 8HP panel: 40.64mm width, 128.5mm height (VCV Rack standard) -->
+
+  <defs>
+    <!-- Background gradient - lighter tints in top third, smooth transition -->
+    <linearGradient id="panelGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#2e2e2e"/>
+      <stop offset="12%" style="stop-color:#282828"/>
+      <stop offset="33%" style="stop-color:#222222"/>
+      <stop offset="100%" style="stop-color:#1a1a1a"/>
+    </linearGradient>
+
+    <!-- Section container gradient (OLED style) -->
+    <linearGradient id="sectionGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a1a1a"/>
+      <stop offset="100%" style="stop-color:#141414"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Main panel background -->
+  <rect x="0" y="0" width="40.64" height="128.5" fill="url(#panelGradient)"/>
+
+  <!-- Panel border -->
+  <rect x="0.3" y="0.3" width="40.04" height="127.9" fill="none" stroke="#000000" stroke-width="0.6"/>
+
+  <!-- Compact bar behind title -->
+  <rect x="0.6" y="0.6" width="39.44" height="6.3" fill="#242424"/>
+
+  <!-- Decorative filled shape (drawn early, underneath everything) -->
+  <path d="M 1.7,85.5 L 1.7,10.15 Q 1.7,8.79 3.06,8.79 L 6.1,8.79 Q 6.77,8.79 7.45,9.47 Q 8.13,10.15 8.81,10.82 Q 9.15,11.16 9.48,11.5 L 10.84,11.5 L 29.8,11.5 L 31.16,11.5 Q 31.5,11.16 31.84,10.82 Q 32.52,10.15 33.2,9.47 Q 33.87,8.79 34.55,8.79 L 40.04,8.79 L 40.04,86.9 L 3.06,86.9 Q 1.7,86.9 1.7,85.5 Z" stroke="#6b4a20" stroke-width="0.17" fill="#2a2a2a"/>
+
+  <!-- Left side vertical line (separate stroke) -->
+  <line x1="0.6" y1="8.8" x2="0.6" y2="86.9" stroke="#252525" stroke-width="0.3"/>
+
+  <!-- Right side vertical line (covers amber stroke on path) -->
+  <line x1="40.04" y1="8.79" x2="40.04" y2="86.9" stroke="#252525" stroke-width="0.3"/>
+
+  <!-- Display area (horizontal at top) -->
+  <rect x="4" y="13.9" width="32.5" height="18.3" fill="#212121" stroke="#5a5a5a" stroke-width="0.3" rx="0.3"/>
+
+  <!-- Square outline inside display area background -->
+  <rect x="4.7" y="14.5" width="31.1" height="12.9" fill="none" stroke="#6b4a20" stroke-width="0.3" rx="0.3"/>
+
+  <!-- IN I/O SECTION -->
+  <!-- Main container -->
+  <rect x="6.1" y="90.3" width="11.5" height="26" rx="1" fill="url(#sectionGradient)" stroke="#3a3a3a" stroke-width="0.3"/>
+  <!-- Sub-container with amber accent -->
+  <rect x="6.8" y="91" width="10.1" height="24.6" rx="0.7" fill="#2a2a2a" stroke="#2a2a2a" stroke-width="0.3"/>
+  <rect x="7.1" y="91.3" width="9.5" height="24" rx="0.5" fill="none" stroke="#6b4a20" stroke-width="0.15"/>
+
+  <!-- OUT I/O SECTION -->
+  <!-- Main container -->
+  <rect x="23" y="90.3" width="11.5" height="26" rx="1" fill="url(#sectionGradient)" stroke="#3a3a3a" stroke-width="0.3"/>
+  <!-- Sub-container with amber accent -->
+  <rect x="23.7" y="91" width="10.1" height="24.6" rx="0.7" fill="#2a2a2a" stroke="#2a2a2a" stroke-width="0.3"/>
+  <rect x="24" y="91.3" width="9.5" height="24" rx="0.5" fill="none" stroke="#6b4a20" stroke-width="0.15"/>
+
+  <!-- Twisted Cable logo rendered by code (see ChanIn.cpp TCLogoWidget) -->
+
+</svg>

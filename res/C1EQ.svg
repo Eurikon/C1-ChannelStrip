@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="76.2mm" height="128.5mm" viewBox="0 0 76.2 128.5">
+  <!-- 15HP panel: 76.2mm width, 128.5mm height (VCV Rack standard) -->
+
+  <defs>
+    <!-- Background gradient - lighter tints in top third, smooth transition -->
+    <linearGradient id="panelGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#2e2e2e"/>
+      <stop offset="12%" style="stop-color:#282828"/>
+      <stop offset="33%" style="stop-color:#222222"/>
+      <stop offset="100%" style="stop-color:#1a1a1a"/>
+    </linearGradient>
+
+    <!-- Section container gradient (OLED style) -->
+    <linearGradient id="sectionGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a1a1a"/>
+      <stop offset="100%" style="stop-color:#141414"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Main panel background -->
+  <rect x="0" y="0" width="76.2" height="128.5" fill="url(#panelGradient)"/>
+
+  <!-- Panel border -->
+  <rect x="0.3" y="0.3" width="75.6" height="127.9" fill="none" stroke="#000000" stroke-width="0.6"/>
+
+  <!-- Compact bar behind title -->
+  <rect x="0.6" y="0.6" width="75" height="6.3" fill="#242424"/>
+
+  <!-- Decorative filled shape - amber stroke on top and bottom -->
+  <path d="M 0.6,8.8 L 75.6,8.8 L 75.6,86.9 L 0.6,86.9 Z" stroke="#6b4a20" stroke-width="0.2" fill="#2a2a2a"/>
+
+  <!-- Left side vertical line (separate stroke) -->
+  <line x1="0.6" y1="8.8" x2="0.6" y2="86.9" stroke="#252525" stroke-width="0.3"/>
+
+  <!-- Right side vertical line (separate stroke) -->
+  <line x1="75.6" y1="8.8" x2="75.6" y2="86.9" stroke="#252525" stroke-width="0.3"/>
+
+  <!-- Audio analysis area -->
+  <rect x="4" y="13.9" width="68" height="18.3" fill="#282828" stroke="#5a5a5a" stroke-width="0.3" rx="0.3"/>
+
+  <!-- INPUT I/O section -->
+  <!-- Main container -->
+  <rect x="6" y="90.3" width="11.5" height="26" rx="1" fill="url(#sectionGradient)" stroke="#3a3a3a" stroke-width="0.3"/>
+  <!-- Sub-container with amber accent -->
+  <rect x="6.7" y="91" width="10.1" height="24.6" rx="0.7" fill="#2a2a2a" stroke="#2a2a2a" stroke-width="0.3"/>
+  <rect x="7" y="91.3" width="9.5" height="24" rx="0.5" fill="none" stroke="#6b4a20" stroke-width="0.15"/>
+
+  <!-- OUTPUT I/O section -->
+  <!-- Main container -->
+  <rect x="56.9" y="90.3" width="11.5" height="26" rx="1" fill="url(#sectionGradient)" stroke="#3a3a3a" stroke-width="0.3"/>
+  <!-- Sub-container with amber accent -->
+  <rect x="57.6" y="91" width="10.1" height="24.6" rx="0.7" fill="#2a2a2a" stroke="#2a2a2a" stroke-width="0.3"/>
+  <rect x="57.9" y="91.3" width="9.5" height="24" rx="0.5" fill="none" stroke="#6b4a20" stroke-width="0.15"/>
+
+  <!-- Twisted Cable logo rendered by code (see C1EQ.cpp TCLogoWidget) -->
+
+</svg>

@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="240" height="380" viewBox="0 0 240 380" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <!-- 16HP Panel background (EURIKON styling) -->
+  <rect width="240" height="380" fill="#353535" rx="0" ry="0"/>
+
+  <!-- Module border -->
+  <rect x="2" y="2" width="236" height="376" fill="none" stroke="#000000" stroke-width="1" rx="0" ry="0"/>
+
+  <!-- Main panel background with EURIKON gradient -->
+  <defs>
+    <linearGradient id="panelGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#f0f0f0;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#e8e8e8;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+
+  <!-- Apply EURIKON background color -->
+  <rect x="2" y="2" width="236" height="376" fill="#353535" stroke="#000000" stroke-width="1" rx="0" ry="0"/>
+
+  <!-- Title section (text rendered by code) -->
+
+  <!-- Gain Reduction Meter (vertical meter on left) -->
+  <rect x="15" y="45" width="30" height="150" fill="#212121" stroke="#5a5a5a" stroke-width="1" rx="2"/>
+
+  <!-- GR meter outline -->
+  <rect x="17" y="47" width="26" height="146" fill="none" stroke="#888888" stroke-width="1" stroke-opacity="0.7" rx="0"/>
+
+  <!-- Compressor Display/Graph area -->
+  <rect x="60" y="45" width="165" height="90" fill="#212121" stroke="#5a5a5a" stroke-width="1" rx="2"/>
+
+  <!-- Display outline -->
+  <rect x="62" y="47" width="161" height="86" fill="none" stroke="#888888" stroke-width="1" stroke-opacity="0.7" rx="0"/>
+
+  <!-- Main Controls section (two columns) -->
+
+  <!-- Left column controls -->
+  <rect x="60" y="150" width="80" height="120" fill="#212121" stroke="#5a5a5a" stroke-width="1" rx="2"/>
+
+  <!-- Right column controls -->
+  <rect x="155" y="150" width="80" height="120" fill="#212121" stroke="#5a5a5a" stroke-width="1" rx="2"/>
+
+  <!-- Sidechain section (right side) -->
+  <rect x="60" y="285" width="80" height="50" fill="#212121" stroke="#5a5a5a" stroke-width="1" rx="2"/>
+
+  <!-- Output section (right side) -->
+  <rect x="155" y="285" width="80" height="50" fill="#212121" stroke="#5a5a5a" stroke-width="1" rx="2"/>
+
+  <!-- I/O section (bottom) -->
+  <rect x="15" y="345" width="210" height="25" fill="#212121" stroke="#5a5a5a" stroke-width="1" rx="2"/>
+
+  <!-- EURIKON logo (positioned at bottom center) -->
+  <g id="eu-logo" transform="translate(120,366) scale(0.3338229951,0.3034754465)">
+    <!-- Light diamond frame -->
+    <path d="M 0,-40 L 45,-15 L -45,-15 Z" fill="none" stroke="#cccccc" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M 45,-15 L 45,15 L 0,40 Z" fill="none" stroke="#cccccc" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M 0,40 L -45,15 L 45,15 Z" fill="none" stroke="#cccccc" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M -45,15 L -45,-15 L 0,-40 Z" fill="none" stroke="#cccccc" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+
+    <!-- Horizontal stripe lines (left side) -->
+    <line x1="-45" y1="-6" x2="-32.4" y2="-6" stroke="#cccccc" stroke-width="1.5"/>
+    <line x1="-45" y1="0"  x2="-36"   y2="0"  stroke="#cccccc" stroke-width="1.5"/>
+    <line x1="-45" y1="6"  x2="-39.6" y2="6"  stroke="#cccccc" stroke-width="1.5"/>
+
+    <!-- Horizontal stripe lines (right side) -->
+    <line x1="32.4" y1="-6" x2="45" y2="-6" stroke="#cccccc" stroke-width="1.5"/>
+    <line x1="36"   y1="0"  x2="45" y2="0"  stroke="#cccccc" stroke-width="1.5"/>
+    <line x1="39.6" y1="6"  x2="45" y2="6"  stroke="#cccccc" stroke-width="1.5"/>
+
+    <!-- Logo backdrop (drawn after stripes so they appear underneath) -->
+    <path d="M -20.0,-14 L 43.0,-14 L 20.0,14 L -43.0,14 Z" fill="#2c2c2c"/>
+
+    <!-- EURIKON text -->
+    <g id="eu-text" transform="translate(-3,0) scale(1)" stroke="#cccccc" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <!-- E -->
+      <path d="M -24,-2 L -24,4 M -24,-2 L -20,-2 M -24,1 L -21,1 M -24,4 L -20,4" />
+      <!-- U -->
+      <path d="M -17,-2 L -17,3 M -17,3 L -16,4 L -14,4 L -13,3 M -13,-2 L -13,3" />
+      <!-- R -->
+      <path d="M -8,-2 L -8,4 M -8,-2 L -5,-2 L -4,-1 L -4,0 L -5,1 L -8,1 M -7,1 L -4,4" />
+      <!-- I -->
+      <path d="M 1,-2 L 1,4" />
+      <!-- K -->
+      <path d="M 6,-2 L 6,4 M 6,1 L 10,-2 M 6,1 L 10,4" />
+      <!-- O -->
+      <path d="M 14,-1 L 14,3 L 15,4 L 17,4 L 18,3 L 18,-1 L 17,-2 L 15,-2 L 14,-1" />
+      <!-- N -->
+      <path d="M 22,4 L 22,-2 M 22,-2 L 26,4 M 26,4 L 26,-2" />
+    </g>
+  </g>
+
+</svg>

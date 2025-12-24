@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="15.24mm" height="128.5mm" viewBox="0 0 15.24 128.5">
+  <!-- 3HP panel: 15.24mm width, 128.5mm height (VCV Rack standard) -->
+
+  <defs>
+    <!-- Background gradient - lighter tints in top third, smooth transition -->
+    <linearGradient id="panelGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#2e2e2e"/>
+      <stop offset="12%" style="stop-color:#282828"/>
+      <stop offset="33%" style="stop-color:#222222"/>
+      <stop offset="100%" style="stop-color:#1a1a1a"/>
+    </linearGradient>
+
+    <!-- Section container gradient (OLED style) -->
+    <linearGradient id="sectionGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a1a1a"/>
+      <stop offset="100%" style="stop-color:#141414"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Main panel background -->
+  <rect x="0" y="0" width="15.24" height="128.5" fill="url(#panelGradient)"/>
+
+  <!-- Panel border -->
+  <rect x="0.3" y="0.3" width="14.64" height="127.9" fill="none" stroke="#000000" stroke-width="0.6"/>
+
+  <!-- Compact bar behind title -->
+  <rect x="0.6" y="0.6" width="14.04" height="6.3" fill="#242424"/>
+
+  <!-- Decorative background shape (TC design, amber stroke touches border) -->
+  <path d="M 0.6,8.8 L 3.4,8.8 Q 3.7,8.8 4.1,9.1 Q 4.4,9.5 4.7,9.8 Q 4.9,10 5.1,10.2 L 5.8,10.2 L 9.5,10.2 L 10.2,10.2 Q 10.3,10 10.5,9.8 Q 10.8,9.5 11.2,9.1 Q 11.5,8.8 11.9,8.8 L 14.64,8.8 L 14.64,110.3 Q 14.64,111.6 12.9,111.6 L 2.4,111.6 Q 0.6,111.6 0.6,110.3 Z"
+        stroke="#6b4a20" stroke-width="0.2" fill="#2a2a2a"/>
+
+  <!-- Left side vertical line (separate stroke) -->
+  <line x1="0.6" y1="8.8" x2="0.6" y2="110.3" stroke="#252525" stroke-width="0.3"/>
+
+  <!-- Right side vertical line (separate stroke) -->
+  <line x1="14.64" y1="8.8" x2="14.64" y2="110.3" stroke="#252525" stroke-width="0.3"/>
+
+  <!-- Vertical amber lines with rounded corners outward at top (stop at black border) -->
+  <path d="M 0.3,86.9 Q 0.6,86.9 0.6,87.2 L 0.6,110.3" stroke="#6b4a20" stroke-width="0.2" fill="none"/>
+  <path d="M 14.94,86.9 Q 14.64,86.9 14.64,87.2 L 14.64,110.3" stroke="#6b4a20" stroke-width="0.2" fill="none"/>
+
+  <!-- Title section (text rendered by code: SH at Y=10, ·X· at Y=30) -->
+
+</svg>

@@ -1,0 +1,38 @@
+# Build artifacts
+build/
+dist/
+plugin.dylib
+*.o
+*.a
+*.vcvplugin
+
+# Local development files (system-specific)
+Makefile.local
+CLAUDE.md
+
+# libebur128 - local prebuilt files and build artifacts
+dep/libebur128/lib/
+dep/libebur128/include/
+dep/libebur128/build/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# IDE/Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Temporary files
+*.tmp
+*.bak
+*.log
+
+
+# Testing folder
+testing/
