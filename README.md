@@ -313,7 +313,7 @@ This installs the plugin to your VCV Rack user plugins directory. </br>
 5. Use Console 1 MK2 encoders to control parameters
 6. LED rings on hardware reflect VCV Rack parameter positions
 
-### Alternative Routing
+### Alternative Routing (only available with the additional commercial plugin)
 
 1. Add C1-ORDER module after C1-COMP
 2. Use Order mode control to change signal chain arrangement
