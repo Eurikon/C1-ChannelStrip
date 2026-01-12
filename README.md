@@ -8,16 +8,16 @@ Free classic channel strip plugin for VCV Rack.</br></br>
 ## Overview
 
 **Twisted Cable - C1-ChannelStrip** </br>
-is a classic channel strip system for VCV Rack, providing signal processing across 5 modules. </br>
+is a classic channel strip for VCV Rack, providing signal processing across 5 modules. </br>
 
 The plugin follows standard mixing console signal flow: </br>
 input leveling, noise gate, equalization, compression, and channel output monitoring. </br></br>
 
 The limited amount of UI controls are based on the hardware controller Softube Console 1 MK2, as it is designed to work in tandem with it.</br> 
-And therefor certain common/expected controls that are not present on the hardware, can be found inside the right-click context menu.</br> 
+Therefor certain common/expected controls that are not present on the hardware, can be found inside the right-click context menu.</br> 
 When combined with the "C1-Control" plugin (separate purchase), optional hardware integration with Softube Console 1 MK2 becomes fully enabled.</br>
 
-The plugin spans 47 HP (not including C1 and the CV expanders) and processes stereo audio through a signal chain with multiple routing options. </br>
+The plugin spans 47 HP (not including C1 and the CV expanders) and processes stereo audio through a signal chain. </br>
 Each module provides DSP processing with visual feedback through meters, spectrum analyzers, and LED indicators.</br>
 
 ## Signal Flow
