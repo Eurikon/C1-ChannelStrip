@@ -1,12 +1,12 @@
 # C1-ChannelStrip - Source Code Attribution & Provenance
 
 This document provides complete attribution and provenance documentation for all code, algorithms, and design elements in the C1-ChannelStrip VCV Rack plugin. </br>
-The project is licensed under GPL-3.0-or-later and builds upon excellent GPL-3.0 licensed work from the VCV Rack community.
+The project is licensed under GPL-3.0-or-later and builds upon excellent GPL-3.0 licensed work from the VCV Rack community. </br> </br>
 
-**Plugin Version**: 2.1.0
-**Date**: 3-11-2025
-**Copyright**: © 2025 Twisted Cable
-**License**: GPL-3.0-or-later
+**Plugin Version**: 2.1.0 </br>
+**Date**: 3-11-2025 </br>
+**Copyright**: © 2025 Twisted Cable </br>
+**License**: GPL-3.0-or-later </br>
 
 ---
 
@@ -37,7 +37,7 @@ The project is licensed under GPL-3.0-or-later and builds upon excellent GPL-3.0
 - **MindMeld MixMaster** (~10%): Anti-pop slewing timing (25V/s specification)
   - License: GPL-3.0-or-later
   - URL: https://github.com/MarcBoule/MindMeldModular
-- **Original C1-ChannelStrip** (~60%): VU/RMS/PPM metering system, EURIKON visual design, Console1 integration, LED ring overlays
+- **Original C1-ChannelStrip** (~60%): VU/RMS/PPM metering system, Console1 integration, LED ring overlays
 
 **License**: GPL-3.0-or-later (fully compatible with all dependencies)
 
@@ -66,7 +66,7 @@ The project is licensed under GPL-3.0-or-later and builds upon excellent GPL-3.0
   - Original Hardware: Mutable Instruments Shelves Eurorack module
 - **FourBand Example Template** (~25.5%): Core EQ architecture, parameter smoothing, RBJ biquad filters, proportional Q algorithm, coefficient caching
   - License: GPL-3.0 compatible example code
-- **Original C1-ChannelStrip** (~30.0%): VCV Rack integration, Console1 MIDI control, GUI/widgets, factory presets
+- **Original C1-ChannelStrip** (~30.0%): VCV Rack integration, Console1 MIDI control, GUI/widgets
 - **Befaco Bandit** (~9.1%): SIMD-optimized filter array architecture pattern
   - License: GPL-3.0-or-later
   - URL: https://github.com/VCVRack/Befaco
@@ -115,7 +115,7 @@ The project is licensed under GPL-3.0-or-later and builds upon excellent GPL-3.0
 
 **Important Disclaimer**: Saturation engines are **approximations** based on academic theory and published specifications, **not** circuit-accurate hardware emulations.
 
-**License**: GPL-3.0-or-later (fully compatible with MindMeld)
+**License**: GPL-3.0-or-later
 
 ---
 
@@ -126,7 +126,7 @@ The project is licensed under GPL-3.0-or-later and builds upon excellent GPL-3.0
 - **URL**: https://vcvrack.com/
 - **Copyright**: © Andrew Belt
 - **Usage**: Core framework, DSP library, MIDI API, component library
-- **Compatibility**: ✅ GPL-3.0 compatible
+- **Compatibility**: GPL-3.0 compatible
 
 ### 2. Mutable Instruments Shelves (via AudibleInstruments)
 - **License**: GPL-3.0-or-later
@@ -135,7 +135,7 @@ The project is licensed under GPL-3.0-or-later and builds upon excellent GPL-3.0
 - **VCV Port**: © Andrew Belt
 - **Used In**: C1-EQ (35.3% of code)
 - **Components**: Anti-aliasing SOSFilter, analog character modeling, VCA compression
-- **Compatibility**: ✅ GPL-3.0 compatible
+- **Compatibility**: GPL-3.0 compatible
 
 ### 3. Befaco Plugin
 - **License**: GPL-3.0-or-later
@@ -146,7 +146,7 @@ The project is licensed under GPL-3.0-or-later and builds upon excellent GPL-3.0
   - AeFilter biquad (originally from repelzen with permission)
   - dB conversion formulas
   - SIMD filter array architecture (Bandit pattern)
-- **Compatibility**: ✅ GPL-3.0 compatible
+- **Compatibility**: GPL-3.0 compatible
 
 ### 4. MindMeld Modular
 - **License**: GPL-3.0-or-later
@@ -161,7 +161,7 @@ The project is licensed under GPL-3.0-or-later and builds upon excellent GPL-3.0
   - DC blocker architecture (10Hz HPF)
   - SIMD framework structure
   - MixMaster channel filter bypass
-- **Compatibility**: ✅ GPL-3.0 compatible
+- **Compatibility**: GPL-3.0 compatible
 
 ### 5. LSP Compressor (Linux Studio Plugins)
 - **License**: GPL-3.0-or-later
@@ -170,7 +170,7 @@ The project is licensed under GPL-3.0-or-later and builds upon excellent GPL-3.0
 - **Used In**: C1COMP (30% of code structure)
 - **Components**: Class structure, parameter interfaces, envelope follower framework
 - **Modifications**: Fixed hardcoded 44.1kHz sample rate, changed RMS to peak detection (VCA)
-- **Compatibility**: ✅ GPL-3.0 compatible
+- **Compatibility**: GPL-3.0 compatible
 
 ### 6. libebur128
 - **License**: MIT License
@@ -179,7 +179,7 @@ The project is licensed under GPL-3.0-or-later and builds upon excellent GPL-3.0
 - **Used In**: CHAN-IN, CHAN-OUT (LUFS metering implementation)
 - **Components**: EBU R128 compliant loudness measurement library
 - **Usage**: Momentary loudness measurement (400ms sliding window) for professional broadcast-standard LUFS metering
-- **Compatibility**: ✅ MIT License is compatible with GPL-3.0-or-later
+- **Compatibility**: MIT License is compatible with GPL-3.0-or-later
 
 **MIT License Text**:
 ```
@@ -343,7 +343,7 @@ All mathematical formulas and algorithms from academic literature are not copyri
 
 ## Modifications Applied to Open-Source Code
 
-All borrowed code has been modified for the C1-ChannelStrip ecosystem. Key modifications:
+All borrowed code has been modified for the C1-ChannelStrip ecosystem. Key modifications:</br>
 
 ### From Befaco
 - Integrated AeFilter with MindMeld anti-pop slewing
@@ -415,7 +415,7 @@ All borrowed code has been modified for the C1-ChannelStrip ecosystem. Key modif
 - **Copyright**: © 2025 Twisted Cable.
 - **License**: GPL-3.0-or-later
 - **Project**: Modular Channel Strip with Softube Console 1 MK2 integration
-- **Development**: Latif Karoumi
+- **Author**: Latif Karoumi
 
 ### Acknowledgments
 
@@ -476,7 +476,7 @@ All borrowed code has been modified for the C1-ChannelStrip ecosystem. Key modif
 
 ### Ethical Considerations
 
-This project strictly adheres to ethical software development practices:
+This project strictly adheres to ethical software development practices:</br>
 
 ✅ **All code derived from**:
 - Open-source GPL-3.0 compatible code (properly attributed)
@@ -497,7 +497,7 @@ This project strictly adheres to ethical software development practices:
 ### Project Resources
 - **VCV Rack**: https://vcvrack.com/
 - **GPL-3.0 License**: https://www.gnu.org/licenses/gpl-3.0.html
-- **Twisted Cable**: https://recordfactory.org
+- **Twisted Cable**: [https://github.com/Eurikon/C1-ChannelStrip]
 
 ### Dependency Repositories
 - **VCV Rack**: https://github.com/VCVRack/Rack
@@ -514,7 +514,7 @@ This project strictly adheres to ethical software development practices:
 
 ### Complete Attribution Details
 
-For comprehensive module-specific attribution with exact code percentages, algorithm provenance, and licensing chains, see:
+For comprehensive module-specific attribution with exact code percentages, algorithm provenance, and licensing chains, see:</br>
 
 - [CHAN-IN dsp references](/docs/manuals/chanin-dsp-references.md)
 - [SHAPE dsp references](/docs/manuals/shape-dsp-references.md)
@@ -526,7 +526,7 @@ For comprehensive module-specific attribution with exact code percentages, algor
 
 **This attribution document ensures full GPL-3.0 compliance and proper credit to all contributors in the VCV Rack ecosystem and broader audio DSP community.**
 
-**Document Version**: 2.0
-**Last Updated**: 03-11-2025
-**Author**: Latif Karoumi
-**License**: GPL-3.0-or-later
+**Document Version**: 2.0</br>
+**Last Updated**: 03-11-2025</br>
+**Author**: Latif Karoumi</br>
+**License**: GPL-3.0-or-later</br>
