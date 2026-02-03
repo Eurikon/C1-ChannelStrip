@@ -58,7 +58,7 @@ struct C1COMPCV : Module {
     };
 
     // Message buffers for communication with C1-COMP
-    C1COMPExpanderMessage leftMessages[2];  // Double buffer for thread safety
+    C1COMPExpanderMessage leftMessages[2] = {};  // Double buffer for thread safety
 
     // CV smoothing filters (1ms time constant to prevent zipper noise)
     dsp::TExponentialFilter<float> ratioCVFilter;

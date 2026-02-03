@@ -58,7 +58,7 @@ struct ChanOutCV : Module {
     };
 
     // Message buffers for communication with CHAN-OUT
-    ChanOutExpanderMessage leftMessages[2];  // Double buffer for thread safety
+    ChanOutExpanderMessage leftMessages[2] = {};  // Double buffer for thread safety
 
     // CV smoothing filters (1ms time constant to prevent zipper noise)
     dsp::TExponentialFilter<float> gainCVFilter;

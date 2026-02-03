@@ -696,9 +696,6 @@ struct C1COMP : Module {
     int compressorType = VCA_TYPE;  // Default: VCA (SSL G)
     int lastCompressorType = VCA_TYPE;  // Track changes to trigger engine switch
 
-    // Expander message buffers for C1COMPCV (COM-X) communication
-    C1COMPExpanderMessage rightMessages[2];  // Double buffer for thread safety
-
     // Context menu settings
     bool vuMeterBarMode = false;  // false = dot mode, true = bar mode
     bool autoMakeup = false;
@@ -960,7 +957,10 @@ struct C1COMP : Module {
 
     void updatePeakMeter(float input, float& peak) {
         // Convert input to dB range: -60dB to +6dB
-        float inputDb = (input > 0.0001f) ? 20.0f * std::log10(input / 5.0f) : -60.0f;
+        float inputDb = -60.0f;
+        if (input > 0.0001f) {
+            inputDb = 20.0f * std::log10(input / 5.0f);
+        }
         inputDb = clamp(inputDb, -60.0f, 6.0f);
 
         // Normalize to 0.0-1.0

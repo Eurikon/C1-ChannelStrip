@@ -54,7 +54,7 @@ struct ChanInCV : Module {
     };
 
     // Message buffers for communication with CHAN-IN
-    ChanInExpanderMessage leftMessages[2];  // Double buffer for thread safety
+    ChanInExpanderMessage leftMessages[2] = {};  // Double buffer for thread safety
 
     // CV smoothing filters (1ms time constant to prevent zipper noise)
     dsp::TExponentialFilter<float> levelCVFilter;

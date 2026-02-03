@@ -54,7 +54,7 @@ struct ShapeCV : Module {
     };
 
     // Message buffers for communication with SHAPE
-    ShapeExpanderMessage leftMessages[2];  // Double buffer for thread safety
+    ShapeExpanderMessage leftMessages[2] = {};  // Double buffer for thread safety
 
     // CV smoothing filters (1ms time constant to prevent zipper noise)
     dsp::TExponentialFilter<float> thresholdCVFilter;

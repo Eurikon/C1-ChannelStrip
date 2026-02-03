@@ -639,7 +639,7 @@ struct Shape : Module {
     int savedTimeWindow = 1;  // Temporarily store loaded time window state (default: Envelope mode)
 
     // Expander message buffers for SHAPE-CV (SH-X) communication
-    ShapeExpanderMessage rightMessages[2];  // Double buffer for thread safety
+    ShapeExpanderMessage rightMessages[2] = {};  // Double buffer for thread safety
 
     float smoothedThreshold = -20.0f;
     float smoothedHardness = 0.0f;
