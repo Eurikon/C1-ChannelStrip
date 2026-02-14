@@ -38,7 +38,8 @@
       "name": "SHAPE",
       "description": "Gate with metering and sidechain",
       "tags": [
-        "Gate",
+        "Envelope follower",
+        "Utility",
         "Dynamics"
       ]
     },
@@ -57,8 +58,7 @@
       "description": "4 band EQ with analog character",
       "tags": [
         "Equalizer",
-        "Filter",
-        "Stereo"
+        "Filter"
       ]
     },
     {
