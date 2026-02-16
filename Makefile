@@ -25,9 +25,5 @@ SOURCES += dep/libebur128/ebur128/ebur128.c
 DISTRIBUTABLES += res
 DISTRIBUTABLES += $(wildcard LICENSE*)
 
-# Restore git submodules (called by toolchain after cleandep)
-dep:
-	git submodule update --init --recursive
-
 # Include VCV Rack plugin build system
 include $(RACK_DIR)/plugin.mk
