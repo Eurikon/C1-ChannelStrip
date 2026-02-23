@@ -4,9 +4,8 @@ permissions:
 
 on:
   push:
-    paths-ignore:
-      - 'README*'
-      - 'docs/**'
+    tags:
+      - 'v*'
   pull_request:
 
 env:
@@ -19,26 +18,8 @@ defaults:
 
 jobs:
 
-  modify-plugin-version:
-    name: Modify plugin version
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/cache@v4
-        id: plugin-version-cache
-        with:
-          path: plugin.json
-          key: ${{ github.sha }}-${{ github.run_id }}
-      - run: |
-          gitrev=`git rev-parse --short HEAD`
-          pluginversion=`jq -r '.version' plugin.json`
-          echo "Set plugin version from $pluginversion to $pluginversion-$gitrev"
-          cat <<< `jq --arg VERSION "$pluginversion-$gitrev" '.version=$VERSION' plugin.json` > plugin.json
-        if: "! startsWith(github.ref, 'refs/tags/v')"
-
   build:
     name: ${{ matrix.platform }}
-    needs: modify-plugin-version
     runs-on: ubuntu-latest
     container:
       image: ghcr.io/qno/rack-plugin-toolchain-win-linux
@@ -52,11 +33,6 @@ jobs:
           submodules: recursive
       - name: Configure git safe directory
         run: git config --global --add safe.directory $GITHUB_WORKSPACE
-      - uses: actions/cache@v4
-        id: plugin-version-cache
-        with:
-          path: plugin.json
-          key: ${{ github.sha }}-${{ github.run_id }}
       - name: Download Rack SDK ${{ env.rack-sdk-version }}
         run: |
           cd ${{ env.rack-plugin-toolchain-dir }}
@@ -84,7 +60,6 @@ jobs:
 
   build-mac:
     name: mac
-    needs: modify-plugin-version
     runs-on: macos-latest
     strategy:
       fail-fast: false
@@ -94,11 +69,6 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
-      - uses: actions/cache@v4
-        id: plugin-version-cache
-        with:
-          path: plugin.json
-          key: ${{ github.sha }}-${{ github.run_id }}
       - name: Get Rack-SDK ${{ env.rack-sdk-version }}
         run: |
           pushd $HOME
@@ -173,28 +143,4 @@ jobs:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: _artifacts/**/*.vcvplugin
           tag: ${{ github.ref }}
-          file_glob: true
-
-  publish-nightly:
-    name: Publish nightly
-    if: ${{ github.ref == 'refs/heads/master' }}
-    runs-on: ubuntu-latest
-    needs: [build, build-mac]
-    steps:
-      - uses: actions/download-artifact@v4
-        with:
-          path: _artifacts
-      - name: Delete old release assets
-        uses: mknejp/delete-release-assets@v1
-        with:
-          token: ${{ github.token }}
-          tag: Nightly
-          fail-if-no-assets: false
-          assets: '*'
-      - name: Upload release assets
-        uses: svenstaro/upload-release-action@v2
-        with:
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: _artifacts/**/*.vcvplugin
-          tag: Nightly
           file_glob: true

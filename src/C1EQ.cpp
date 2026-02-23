@@ -1300,7 +1300,7 @@ struct C1EQ : Module {
 
         // MindMeld-style parameter smoothing - use existing smoothers to prevent artifacts
         // Get correct parameter indices for each band
-        ParamIds freqParam, qParam, gainParam;
+        ParamIds freqParam, qParam = B2_Q_PARAM, gainParam;
         switch(band) {
             case 0: freqParam = B1_FREQ_PARAM; gainParam = B1_GAIN_PARAM; break;
             case 1: freqParam = B2_FREQ_PARAM; qParam = B2_Q_PARAM; gainParam = B2_GAIN_PARAM; break;
