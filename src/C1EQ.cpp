@@ -228,60 +228,6 @@ struct SafeBiquad {
     }
 };
 
-// RBJ cookbook designs (unchanged - proven safe)
-static void designPeaking(SafeBiquad &f, double fs, double f0, double Q, double gainDB) {
-    if (f0 <= 0.0 || fs <= 0.0) {
-        f.b0 = 1; f.b1 = 0; f.b2 = 0; f.a0 = 1; f.a1 = 0; f.a2 = 0;
-        return;
-    }
-
-    double A = std::pow(10.0, gainDB / 40.0);
-    double w0 = 2.0 * M_PI * f0 / fs;
-    double alpha = std::sin(w0) / (2.0 * Q);
-    double cosw0 = std::cos(w0);
-
-    double b0 = 1.0 + alpha * A;
-    double b1 = -2.0 * cosw0;
-    double b2 = 1.0 - alpha * A;
-    double a0 = 1.0 + alpha / A;
-    double a1 = -2.0 * cosw0;
-    double a2 = 1.0 - alpha / A;
-
-    f.b0 = b0; f.b1 = b1; f.b2 = b2;
-    f.a0 = a0; f.a1 = a1; f.a2 = a2;
-}
-
-static void designShelf(SafeBiquad &f, double fs, double f0, double S, double gainDB, bool highShelf) {
-    if (f0 <= 0.0 || fs <= 0.0) {
-        f.b0 = 1; f.b1 = 0; f.b2 = 0; f.a0 = 1; f.a1 = 0; f.a2 = 0;
-        return;
-    }
-
-    double A = std::pow(10.0, gainDB / 40.0);
-    double w0 = 2.0 * M_PI * f0 / fs;
-    double cosw0 = std::cos(w0);
-    double sinw0 = std::sin(w0);
-    double alpha = sinw0 / 2.0 * std::sqrt((A + 1.0/A)*(1.0/S - 1.0) + 2.0);
-
-    if (highShelf) {
-        double b0 =    A*((A+1.0) + (A-1.0)*cosw0 + 2.0*sqrt(A)*alpha);
-        double b1 = -2.0*A*((A-1.0) + (A+1.0)*cosw0);
-        double b2 =    A*((A+1.0) + (A-1.0)*cosw0 - 2.0*sqrt(A)*alpha);
-        double a0 =        (A+1.0) - (A-1.0)*cosw0 + 2.0*sqrt(A)*alpha;
-        double a1 =  2.0*((A-1.0) - (A+1.0)*cosw0);
-        double a2 =        (A+1.0) - (A-1.0)*cosw0 - 2.0*sqrt(A)*alpha;
-        f.b0 = b0; f.b1 = b1; f.b2 = b2; f.a0 = a0; f.a1 = a1; f.a2 = a2;
-    } else {
-        double b0 =    A*((A+1.0) - (A-1.0)*cosw0 + 2.0*sqrt(A)*alpha);
-        double b1 =  2.0*A*((A-1.0) - (A+1.0)*cosw0);
-        double b2 =    A*((A+1.0) - (A-1.0)*cosw0 - 2.0*sqrt(A)*alpha);
-        double a0 =        (A+1.0) + (A-1.0)*cosw0 + 2.0*sqrt(A)*alpha;
-        double a1 = -2.0*((A-1.0) + (A+1.0)*cosw0);
-        double a2 =        (A+1.0) + (A-1.0)*cosw0 - 2.0*sqrt(A)*alpha;
-        f.b0 = b0; f.b1 = b1; f.b2 = b2; f.a0 = a0; f.a1 = a1; f.a2 = a2;
-    }
-}
-
 // Analog character processor (Shelves-inspired techniques)
 struct SafeAnalogProcessor {
     enum AnalogMode {

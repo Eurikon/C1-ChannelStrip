@@ -705,7 +705,7 @@ struct C1COMP : Module {
     float kneeOverride = -1.0f;  // -1 = Auto (use engine defaults), 0-12 = override knee width
 
     // SSL G discrete attack times (6 positions)
-    static inline constexpr float attackValues[6] = {0.1f, 0.3f, 1.0f, 3.0f, 10.0f, 30.0f};
+    static constexpr float attackValues[6] = {0.1f, 0.3f, 1.0f, 3.0f, 10.0f, 30.0f};
 
     // Peak metering state (normalized 0.0-1.0 for display)
     float peakInputLeft = 0.0f;

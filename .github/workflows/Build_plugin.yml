@@ -113,7 +113,6 @@ jobs:
         run: |
           export RACK_DIR=$HOME/Rack-SDK
           make clean
-          make dep
           if [[ "${{ matrix.platform }}" == "x64" ]]; then
             arch -x86_64 make dist
           else

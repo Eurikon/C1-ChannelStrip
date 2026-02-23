@@ -234,22 +234,16 @@ This plugin is an independent implementation and is not affiliated with, endorse
 ### Requirements
 
 - **VCV Rack**: Either VCV Rack SDK or full Rack source tree
-- **C++17 Compiler**: GCC, Clang, or MSVC with C++17 support
-- **C Compiler**: For compiling libebur128 dependency
+- **C++ Compiler**: GCC, Clang, or MSVC with C++11 support (or later)
+- **C Compiler**: For compiling libebur128 dependency (included in repository)
 
 ### Build Instructions
 
-**1. Clone the repository with submodules:** </br>
+**1. Clone the repository:** </br>
 
 ```bash
-git clone --recurse-submodules https://github.com/Eurikon/C1-ChannelStrip.git
+git clone https://github.com/Eurikon/C1-ChannelStrip.git
 cd C1-ChannelStrip
-```
-
-**If you already cloned without submodules:** </br>
-
-```bash
-git submodule update --init --recursive
 ```
 
 **2. Build the plugin:** </br>
@@ -286,9 +280,6 @@ This installs the plugin to your VCV Rack user plugins directory. </br>
 - Use MSYS2 or Visual Studio command prompt
 
 ### Troubleshooting Build Issues
-
-**"dep/libebur128 directory is empty":** </br>
-- Run: `git submodule update --init --recursive`
 
 **"Cannot find Rack headers":** </br>
 - Ensure plugin is in `Rack/plugins/C1-ChannelStrip/` directory

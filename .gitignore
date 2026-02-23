@@ -10,10 +10,6 @@ plugin.dylib
 Makefile.local
 CLAUDE.md
 
-# libebur128 - local prebuilt files and build artifacts
-dep/libebur128/lib/
-dep/libebur128/include/
-dep/libebur128/build/
 
 # macOS
 .DS_Store

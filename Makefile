@@ -7,10 +7,10 @@
 RACK_DIR ?= ../..
 
 # Common include paths (apply to both C and C++ compilation)
-FLAGS += -Idep/libebur128/ebur128 -Idep/libebur128/ebur128/queue
+FLAGS += -Ideps/ebur128 -Ideps/ebur128/queue
 
 # C++ specific flags
-CXXFLAGS += -std=c++17 -Ishared/include
+CXXFLAGS += -Ishared/include
 
 # Source files
 SOURCES += $(wildcard src/*.cpp)
@@ -19,7 +19,7 @@ SOURCES += shared/src/VCACompressor.cpp
 SOURCES += shared/src/FETCompressor.cpp
 SOURCES += shared/src/OpticalCompressor.cpp
 SOURCES += shared/src/VariMuCompressor.cpp
-SOURCES += dep/libebur128/ebur128/ebur128.c
+SOURCES += deps/ebur128/ebur128.c
 
 # Distributables
 DISTRIBUTABLES += res
