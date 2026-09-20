@@ -3,8 +3,8 @@
 This document provides complete attribution and provenance documentation for all code, algorithms, and design elements in the C1-ChannelStrip VCV Rack plugin. </br>
 The project is licensed under GPL-3.0-or-later and builds upon excellent GPL-3.0 licensed work from the VCV Rack community. </br> </br>
 
-**Plugin Version**: 2.1.0 </br>
-**Date**: 3-11-2025 </br>
+**Plugin Version**: 2.1.5 </br>
+**Date**: 21-09-2026 </br>
 **Copyright**: © 2025 Twisted Cable </br>
 **License**: GPL-3.0-or-later </br>
 

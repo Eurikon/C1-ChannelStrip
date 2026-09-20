@@ -817,6 +817,13 @@ struct C1COMP : Module {
         // Disable randomize - do nothing
     }
 
+    void onSampleRateChange(const SampleRateChangeEvent& e) override {
+        if (comp) {
+            comp->setSampleRate(e.sampleRate);
+        }
+        peakDecayCoeff = std::exp(-1.0f / (0.3f * e.sampleRate));
+    }
+
     void setCompressorType(int type) {
         // Delete old engine
         if (comp) {
@@ -857,11 +864,6 @@ struct C1COMP : Module {
 
         // Set sample rate (recalculates attack/release coefficients if changed)
         comp->setSampleRate(args.sampleRate);
-
-        // Calculate peak decay coefficient (300ms time constant)
-        if (peakDecayCoeff == 0.0f) {
-            peakDecayCoeff = std::exp(-1.0f / (0.3f * args.sampleRate));
-        }
 
         // Get bypass state
         bool bypassed = params[BYPASS_PARAM].getValue() > 0.5f;

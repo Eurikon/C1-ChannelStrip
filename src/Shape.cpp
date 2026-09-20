@@ -739,10 +739,10 @@ struct Shape : Module {
         // Module removed from rack - no special action needed
     }
 
-    void onSampleRateChange() override {
-        float sr = APP->engine->getSampleRate();
-        leftGate.prepare(sr);
-        rightGate.prepare(sr);
+    void onSampleRateChange(const SampleRateChangeEvent& e) override {
+        leftGate.prepare(e.sampleRate);
+        rightGate.prepare(e.sampleRate);
+        peakDecayCoeff = std::pow(0.995f, 48000.0f / e.sampleRate);
     }
 
     void process(const ProcessArgs& args) override {

@@ -2,9 +2,14 @@
 
 ---
 
-## Version 2.1.0+ (Release)
+## Version 2.1.5 - 21-09-2026
 
-*Entries for v2.1.0 and above will be added here*
+### Changed
+
+- Made CHAN-IN RMS, VU, PPM, and peak-hold timing follow Rack sample-rate changes.
+- Made SHAPE gate-meter decay consistent across sample rates.
+- Made C1-COMP peak-meter decay refresh after sample-rate changes.
+- Renamed the CHAN-IN filter labels from HPF/LPF to H-CUT/L-CUT.
 
 ---
 

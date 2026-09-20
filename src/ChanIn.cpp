@@ -127,8 +127,9 @@ struct RMSMeterDisplay : widget::TransparentWidget {
     Module* module;
 
     // RMS calculation parameters
-    static constexpr int RMS_WINDOW_SIZE = 2048;  // ~43ms at 48kHz for smooth RMS
+    int rmsWindowSize = 2048;  // ~43ms at 48kHz for smooth RMS
     static constexpr float RMS_ALPHA = 0.05f;     // Smoothing factor for RMS integration
+    float sampleRate = 48000.0f;
 
     // Visual parameters
     float display_width = 88.0f;    // 4px clearance from each side (96-8=88)
@@ -157,7 +158,10 @@ struct RMSMeterDisplay : widget::TransparentWidget {
     uint8_t meter_r = 0xFF, meter_g = 0xC0, meter_b = 0x50;  // Amber (matching LED rings)
     uint8_t bg_r = 40, bg_g = 40, bg_b = 40;                  // Dark background
 
-    RMSMeterDisplay(Module* module) : module(module) {}
+    RMSMeterDisplay(Module* module) : module(module) {
+        sampleRate = APP->engine->getSampleRate();
+        rmsWindowSize = std::max(1, (int)std::round(2048.0f * sampleRate / 48000.0f));
+    }
 
     void reset() {
         // Reset all RMS state
@@ -183,8 +187,8 @@ struct RMSMeterDisplay : widget::TransparentWidget {
         sum_squares_right += right * right;
         sample_count++;
 
-        // Calculate RMS every RMS_WINDOW_SIZE samples
-        if (sample_count >= RMS_WINDOW_SIZE) {
+        // Calculate RMS every window
+        if (sample_count >= rmsWindowSize) {
             // Calculate RMS: sqrt(mean(squares))
             rms_left = std::sqrt(sum_squares_left / sample_count);
             rms_right = std::sqrt(sum_squares_right / sample_count);
@@ -204,15 +208,15 @@ struct RMSMeterDisplay : widget::TransparentWidget {
             }
 
             // Decay peak hold timers
-            peak_hold_timer_left = std::max(0.0f, peak_hold_timer_left - (RMS_WINDOW_SIZE / 48000.0f));
-            peak_hold_timer_right = std::max(0.0f, peak_hold_timer_right - (RMS_WINDOW_SIZE / 48000.0f));
+            peak_hold_timer_left = std::max(0.0f, peak_hold_timer_left - (rmsWindowSize / sampleRate));
+            peak_hold_timer_right = std::max(0.0f, peak_hold_timer_right - (rmsWindowSize / sampleRate));
 
             // Decay peak hold to current value when timer expires
             if (peak_hold_timer_left <= 0.0f) {
-                peak_hold_left = std::max(peak_hold_left - (RMS_WINDOW_SIZE / 48000.0f) * 10.0f, smoothed_rms_left);
+                peak_hold_left = std::max(peak_hold_left - (rmsWindowSize / sampleRate) * 10.0f, smoothed_rms_left);
             }
             if (peak_hold_timer_right <= 0.0f) {
-                peak_hold_right = std::max(peak_hold_right - (RMS_WINDOW_SIZE / 48000.0f) * 10.0f, smoothed_rms_right);
+                peak_hold_right = std::max(peak_hold_right - (rmsWindowSize / sampleRate) * 10.0f, smoothed_rms_right);
             }
 
             // Reset accumulators
@@ -354,6 +358,7 @@ struct VUMeterDisplay : widget::TransparentWidget {
     float vu_right = 0.0f;
     float attack_coeff = 0.0f;
     float decay_coeff = 0.0f;
+    float sampleRate = 48000.0f;
     int vu_decimation_counter = 0;
 
     // Peak hold state for VU
@@ -369,7 +374,7 @@ struct VUMeterDisplay : widget::TransparentWidget {
 
     VUMeterDisplay(Module* module) : module(module) {
         // Calculate VU ballistic coefficients based on sample rate
-        updateCoefficients();
+        updateCoefficients(APP->engine->getSampleRate());
     }
 
     void reset() {
@@ -383,13 +388,13 @@ struct VUMeterDisplay : widget::TransparentWidget {
         vu_peak_hold_timer_right = 0.0f;
     }
 
-    void updateCoefficients() {
+    void updateCoefficients(float sampleRate) {
         if (!module) return;
-        float sampleRate = APP->engine->getSampleRate();
+        this->sampleRate = sampleRate;
 
         // Calculate exponential decay coefficients for VU ballistics
-        attack_coeff = 1.0f - std::exp(-1000.0f / (VU_ATTACK_MS * sampleRate));
-        decay_coeff = 1.0f - std::exp(-1000.0f / (VU_DECAY_MS * sampleRate));
+        attack_coeff = 1.0f - std::exp(-1000.0f * VU_DECIMATION / (VU_ATTACK_MS * sampleRate));
+        decay_coeff = 1.0f - std::exp(-1000.0f * VU_DECIMATION / (VU_DECAY_MS * sampleRate));
     }
 
     void addStereoSample(float left, float right) {
@@ -430,7 +435,7 @@ struct VUMeterDisplay : widget::TransparentWidget {
         }
 
         // Decay peak hold timers (time delta per VU_DECIMATION samples)
-        float delta_time = VU_DECIMATION / 48000.0f;
+        float delta_time = VU_DECIMATION / sampleRate;
         vu_peak_hold_timer_left = std::max(0.0f, vu_peak_hold_timer_left - delta_time);
         vu_peak_hold_timer_right = std::max(0.0f, vu_peak_hold_timer_right - delta_time);
 
@@ -579,6 +584,7 @@ struct PPMMeterDisplay : widget::TransparentWidget {
     float peak_right = 0.0f;
     float attack_coeff = 0.0f;
     float decay_coeff = 0.0f;
+    float sampleRate = 48000.0f;
     int ppm_decimation_counter = 0;
 
     // Peak hold state for PPM
@@ -593,7 +599,7 @@ struct PPMMeterDisplay : widget::TransparentWidget {
     uint8_t bg_r = 40, bg_g = 40, bg_b = 40;                  // Dark background
 
     PPMMeterDisplay(Module* module) : module(module) {
-        updateCoefficients();
+        updateCoefficients(APP->engine->getSampleRate());
     }
 
     void reset() {
@@ -609,13 +615,13 @@ struct PPMMeterDisplay : widget::TransparentWidget {
         ppm_peak_hold_timer_right = 0.0f;
     }
 
-    void updateCoefficients() {
+    void updateCoefficients(float sampleRate) {
         if (!module) return;
-        float sampleRate = APP->engine->getSampleRate();
+        this->sampleRate = sampleRate;
 
         // Calculate exponential coefficients for PPM ballistics
-        attack_coeff = 1.0f - std::exp(-1000.0f / (PPM_ATTACK_MS * sampleRate));
-        decay_coeff = 1.0f - std::exp(-1000.0f / (PPM_DECAY_MS * sampleRate));
+        attack_coeff = 1.0f - std::exp(-1000.0f * PPM_DECIMATION / (PPM_ATTACK_MS * sampleRate));
+        decay_coeff = 1.0f - std::exp(-1000.0f * PPM_DECIMATION / (PPM_DECAY_MS * sampleRate));
     }
 
     void addStereoSample(float left, float right) {
@@ -658,15 +664,15 @@ struct PPMMeterDisplay : widget::TransparentWidget {
         }
 
         // Decay PPM peak hold timers
-        ppm_peak_hold_timer_left = std::max(0.0f, ppm_peak_hold_timer_left - (PPM_DECIMATION / 48000.0f));
-        ppm_peak_hold_timer_right = std::max(0.0f, ppm_peak_hold_timer_right - (PPM_DECIMATION / 48000.0f));
+        ppm_peak_hold_timer_left = std::max(0.0f, ppm_peak_hold_timer_left - (PPM_DECIMATION / sampleRate));
+        ppm_peak_hold_timer_right = std::max(0.0f, ppm_peak_hold_timer_right - (PPM_DECIMATION / sampleRate));
 
         // Decay PPM peak hold to current value when timer expires
         if (ppm_peak_hold_timer_left <= 0.0f) {
-            ppm_peak_hold_left = std::max(ppm_peak_hold_left - (PPM_DECIMATION / 48000.0f) * 10.0f, ppm_left);
+            ppm_peak_hold_left = std::max(ppm_peak_hold_left - (PPM_DECIMATION / sampleRate) * 10.0f, ppm_left);
         }
         if (ppm_peak_hold_timer_right <= 0.0f) {
-            ppm_peak_hold_right = std::max(ppm_peak_hold_right - (PPM_DECIMATION / 48000.0f) * 10.0f, ppm_right);
+            ppm_peak_hold_right = std::max(ppm_peak_hold_right - (PPM_DECIMATION / sampleRate) * 10.0f, ppm_right);
         }
     }
 
@@ -1024,9 +1030,6 @@ struct ChanIn : Module, IChanInVuLevels {
             vuLevelsRight[i] = 0.02f;
         }
 
-        // Critical: Initialize sample rate dependencies first
-        onSampleRateChange();
-
         filters.updateFiltersIfChanged(
             params[HIGH_CUT_PARAM].getValue(),  // 20000.0f default
             params[LOW_CUT_PARAM].getValue(),   // 20.0f default
@@ -1071,7 +1074,7 @@ struct ChanIn : Module, IChanInVuLevels {
         // Module removed from rack - no special action needed
     }
 
-    void onSampleRateChange() override {
+    void onSampleRateChange(const SampleRateChangeEvent& e) override {
         // Reset VCA state
         leftVCA.prepare();
         rightVCA.prepare();
@@ -1084,6 +1087,20 @@ struct ChanIn : Module, IChanInVuLevels {
             params[LOW_CUT_PARAM].getValue(),
             true  // forceUpdate = true for sample rate changes
         );
+
+        auto* rms = rmsMeter.load();
+        if (rms) {
+            rms->sampleRate = e.sampleRate;
+            rms->rmsWindowSize = std::max(1, (int)std::round(2048.0f * e.sampleRate / 48000.0f));
+        }
+        auto* vu = vuMeter.load();
+        if (vu) {
+            vu->updateCoefficients(e.sampleRate);
+        }
+        auto* ppm = ppmMeter.load();
+        if (ppm) {
+            ppm->updateCoefficients(e.sampleRate);
+        }
     }
 
     json_t* dataToJson() override {
@@ -1583,12 +1600,12 @@ struct ChanInWidget : ModuleWidget {
             }
         };
 
-        ControlLabel* hpfLabel = new ControlLabel("HPF");
+        ControlLabel* hpfLabel = new ControlLabel("H-CUT");
         hpfLabel->box.pos = Vec(85, 149);
         hpfLabel->box.size = Vec(40, 10);
         addChild(hpfLabel);
 
-        ControlLabel* lpfLabel = new ControlLabel("LPF");
+        ControlLabel* lpfLabel = new ControlLabel("L-CUT");
         lpfLabel->box.pos = Vec(85, 199);
         lpfLabel->box.size = Vec(40, 10);
         addChild(lpfLabel);
