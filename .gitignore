@@ -6,6 +6,10 @@ plugin.dylib
 *.a
 *.vcvplugin
 
+# Local development files
+Makefile.local
+CLAUDE.md
+testing/
 
 # macOS
 .DS_Store
