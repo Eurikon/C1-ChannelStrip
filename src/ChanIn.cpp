@@ -49,13 +49,10 @@ struct LedRingOverlay : widget::TransparentWidget {
     }
 
     void draw(const DrawArgs& args) override {
-        if (!module) return;
-
-        ParamQuantity* pq = module->paramQuantities[paramId];
-        if (!pq) return;
+        ParamQuantity* pq = module ? module->paramQuantities[paramId] : nullptr;
 
         // Get normalized parameter value (0-1) - handles bipolar parameters correctly
-        float paramValue = pq->getScaledValue();
+        float paramValue = pq ? pq->getScaledValue() : 0.0f;
 
         // LED ring parameters
         const int dotCount = 15;
@@ -227,8 +224,6 @@ struct RMSMeterDisplay : widget::TransparentWidget {
     }
 
     void draw(const DrawArgs& args) override {
-        if (!module) return;
-
         // Background bar
         nvgFillColor(args.vg, nvgRGBA(bg_r, bg_g, bg_b, 255));
         nvgBeginPath(args.vg);
@@ -449,8 +444,6 @@ struct VUMeterDisplay : widget::TransparentWidget {
     }
 
     void draw(const DrawArgs& args) override {
-        if (!module) return;
-
         // Background bar (same styling as RMS)
         nvgFillColor(args.vg, nvgRGBA(bg_r, bg_g, bg_b, 255));
         nvgBeginPath(args.vg);
@@ -677,8 +670,6 @@ struct PPMMeterDisplay : widget::TransparentWidget {
     }
 
     void draw(const DrawArgs& args) override {
-        if (!module) return;
-
         // Background bar (same styling as RMS/VU)
         nvgFillColor(args.vg, nvgRGBA(bg_r, bg_g, bg_b, 255));
         nvgBeginPath(args.vg);
@@ -986,7 +977,7 @@ struct ChanIn : Module, IChanInVuLevels {
     int activeMeterMode = 0;
 
     // Expander message buffers for CHAN-IN-CV communication
-    ChanInExpanderMessage rightMessages[2];  // Double buffer for thread safety
+    ChanInExpanderMessage rightMessages[2] = {};  // Double buffer for thread safety
 
     // CV-modulated filter frequencies (for bypass logic)
     float activeHighCutFreq = 20000.0f;
@@ -1010,6 +1001,10 @@ struct ChanIn : Module, IChanInVuLevels {
         configParam(LOW_CUT_PARAM, 20.0f, 500.0f, 20.0f, "Low Cut", " Hz");
         configParam<PhaseParamQuantity>(PHASE_PARAM, 0.0f, 1.0f, 0.0f, "Phase Invert");
         configParam(DISPLAY_ENABLE_PARAM, 0.0f, 1.0f, 1.0f, "Display Visibility");  // Default ON
+
+        for (ParamQuantity* quantity : paramQuantities) {
+            quantity->randomizeEnabled = false;
+        }
 
         configInput(LEFT_INPUT, "Left");
         configInput(RIGHT_INPUT, "Right (left normalled)");
@@ -1059,11 +1054,6 @@ struct ChanIn : Module, IChanInVuLevels {
         std::this_thread::sleep_for(std::chrono::microseconds(100));
 
         // No complex operations, just ensure safe state
-    }
-
-    void onRandomize(const RandomizeEvent& e) override {
-        (void)e;  // Suppress unused parameter warning
-        // Disable randomize - do nothing
     }
 
     void onAdd() override {
@@ -1406,8 +1396,6 @@ struct DynamicDbReadoutWidget : widget::TransparentWidget {
     DynamicDbReadoutWidget(ChanIn* m) : module(m) {}
 
     void draw(const DrawArgs& args) override {
-        if (!module) return;
-
         // Amber color matching meter
         nvgFillColor(args.vg, nvgRGBA(0xFF, 0xC0, 0x50, 200));
         nvgFontSize(args.vg, 7.0f);
@@ -1418,7 +1406,7 @@ struct DynamicDbReadoutWidget : widget::TransparentWidget {
         float peakDb = -60.0f;
         bool hasSignal = false;
 
-        if (module->activeMeterMode == 0) {
+        if (module && module->activeMeterMode == 0) {
             // RMS meter
             auto* rms = module->rmsMeter.load();
             if (rms) {
@@ -1432,7 +1420,7 @@ struct DynamicDbReadoutWidget : widget::TransparentWidget {
                     hasSignal = true;
                 }
             }
-        } else if (module->activeMeterMode == 1) {
+        } else if (module && module->activeMeterMode == 1) {
             // VU meter
             auto* vu = module->vuMeter.load();
             if (vu) {
@@ -1446,7 +1434,7 @@ struct DynamicDbReadoutWidget : widget::TransparentWidget {
                     hasSignal = true;
                 }
             }
-        } else if (module->activeMeterMode == 2) {
+        } else if (module && module->activeMeterMode == 2) {
             // PPM meter
             auto* ppm = module->ppmMeter.load();
             if (ppm) {
@@ -1579,7 +1567,7 @@ struct ChanInWidget : ModuleWidget {
 
         struct ControlLabel : Widget {
             std::string text;
-            ControlLabel(std::string t) : text(t) {}
+            ControlLabel(const std::string& t) : text(t) {}
             void draw(const DrawArgs& args) override {
                 std::shared_ptr<Font> sonoFont = APP->window->loadFont(asset::plugin(pluginInstance, "res/fonts/Sono/static/Sono_Proportional-Medium.ttf"));
                 nvgFontFaceId(args.vg, sonoFont->handle);
@@ -1849,181 +1837,178 @@ struct ChanInWidget : ModuleWidget {
         addOutput(createOutputCentered<ThemedPJ301MPort>(Vec(85, 313), module, ChanIn::RIGHT_OUTPUT));
 
         // Add RMS meter in audio analysis area (leaving space for switches at top)
-        if (module) {
-            rmsMeter = new RMSMeterDisplay(module);
-            rmsMeter->box.pos = Vec(16, 56);    // 5.4px clearance (matching C1COMP)
-            rmsMeter->box.size = Vec(88, 7.5f);
-            addChild(rmsMeter);
+        rmsMeter = new RMSMeterDisplay(module);
+        rmsMeter->box.pos = Vec(16, 56);    // 5.4px clearance (matching C1COMP)
+        rmsMeter->box.size = Vec(88, 7.5f);
+        addChild(rmsMeter);
 
-            // Connect meter to module for sample feeding (atomic store for cross-platform thread safety)
-            static_cast<ChanIn*>(module)->rmsMeter.store(rmsMeter);
+        // Connect meter to module for sample feeding (atomic store for cross-platform thread safety)
+        if (module) static_cast<ChanIn*>(module)->rmsMeter.store(rmsMeter);
 
-            // Add VU meter below RMS meter
-            vuMeter = new VUMeterDisplay(module);
-            vuMeter->box.pos = Vec(16, 63.5f);    // 7.5px below RMS meter
-            vuMeter->box.size = Vec(88, 7.5f);
-            addChild(vuMeter);
+        // Add VU meter below RMS meter
+        vuMeter = new VUMeterDisplay(module);
+        vuMeter->box.pos = Vec(16, 63.5f);    // 7.5px below RMS meter
+        vuMeter->box.size = Vec(88, 7.5f);
+        addChild(vuMeter);
 
-            // Connect VU meter to module for sample feeding (atomic store for cross-platform thread safety)
-            static_cast<ChanIn*>(module)->vuMeter.store(vuMeter);
+        // Connect VU meter to module for sample feeding (atomic store for cross-platform thread safety)
+        if (module) static_cast<ChanIn*>(module)->vuMeter.store(vuMeter);
 
-            // Add PPM meter below VU meter
-            ppmMeter = new PPMMeterDisplay(module);
-            ppmMeter->box.pos = Vec(16, 71.0f);   // 7.5px below VU meter
-            ppmMeter->box.size = Vec(88, 7.5f);
-            addChild(ppmMeter);
+        // Add PPM meter below VU meter
+        ppmMeter = new PPMMeterDisplay(module);
+        ppmMeter->box.pos = Vec(16, 71.0f);   // 7.5px below VU meter
+        ppmMeter->box.size = Vec(88, 7.5f);
+        addChild(ppmMeter);
 
-            // Connect PPM meter to module for sample feeding (atomic store for cross-platform thread safety)
-            static_cast<ChanIn*>(module)->ppmMeter.store(ppmMeter);
+        // Connect PPM meter to module for sample feeding (atomic store for cross-platform thread safety)
+        if (module) static_cast<ChanIn*>(module)->ppmMeter.store(ppmMeter);
 
-            // Initialize: Reset all inactive meters to prevent stuck values on startup
-            // Default mode is 0 (RMS), so reset VU and PPM meters
-            vuMeter->reset();
-            ppmMeter->reset();
+        // Initialize: Reset all inactive meters to prevent stuck values on startup
+        // Default mode is 0 (RMS), so reset VU and PPM meters
+        vuMeter->reset();
+        ppmMeter->reset();
 
-            // Add metering switch widget in upper left corner of metering display
-            this->meteringSwitchWidget = new MeteringSwitchWidget(module);
-            this->meteringSwitchWidget->box.pos = Vec(14, 43);
-            this->meteringSwitchWidget->box.size = Vec(23, 12);    // 3 switches: 2px margin + 3×5.6px switches + 2×1.4px gaps + 2px margin
-            addChild(this->meteringSwitchWidget);
+        // Add metering switch widget in upper left corner of metering display
+        this->meteringSwitchWidget = new MeteringSwitchWidget(module);
+        this->meteringSwitchWidget->box.pos = Vec(14, 43);
+        this->meteringSwitchWidget->box.size = Vec(23, 12);    // 3 switches: 2px margin + 3×5.6px switches + 2×1.4px gaps + 2px margin
+        addChild(this->meteringSwitchWidget);
 
-            // Connect widget to module for state synchronization (atomic store for cross-platform thread safety)
-            static_cast<ChanIn*>(module)->meteringSwitchWidget.store(this->meteringSwitchWidget);
-            // Sync saved meter mode state to widget
-            static_cast<ChanIn*>(module)->syncMeterModeToWidget();
+        // Connect widget to module for state synchronization (atomic store for cross-platform thread safety)
+        if (module) static_cast<ChanIn*>(module)->meteringSwitchWidget.store(this->meteringSwitchWidget);
+        // Sync saved meter mode state to widget
+        if (module) static_cast<ChanIn*>(module)->syncMeterModeToWidget();
 
-            // Meter type label - displays current meter name
-            struct MeterTypeLabel : Widget {
-                ChanIn* module;
-                MeterTypeLabel(ChanIn* m) : module(m) {}
-                void draw(const DrawArgs& args) override {
-                    if (!module) return;
+        // Meter type label - displays current meter name
+        struct MeterTypeLabel : Widget {
+            ChanIn* module;
+            MeterTypeLabel(ChanIn* m) : module(m) {}
+            void draw(const DrawArgs& args) override {
+                const char* meterNames[3] = {"RMS", "VU", "PPM"};
+                int mode = module ? module->activeMeterMode : 0;
+                mode = clamp(mode, 0, 2);
 
-                    const char* meterNames[3] = {"RMS", "VU", "PPM"};
-                    int mode = module->activeMeterMode;
-                    mode = clamp(mode, 0, 2);
+                nvgFontSize(args.vg, 6.0f);
+                nvgFontFaceId(args.vg, APP->window->uiFont->handle);
+                nvgTextAlign(args.vg, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE);
+                nvgFillColor(args.vg, nvgRGBA(0xFF, 0xC0, 0x50, 200));  // Amber
+                nvgText(args.vg, 0, box.size.y / 2, meterNames[mode], NULL);
+            }
+        };
 
-                    nvgFontSize(args.vg, 6.0f);
-                    nvgFontFaceId(args.vg, APP->window->uiFont->handle);
-                    nvgTextAlign(args.vg, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE);
-                    nvgFillColor(args.vg, nvgRGBA(0xFF, 0xC0, 0x50, 200));  // Amber
-                    nvgText(args.vg, 0, box.size.y / 2, meterNames[mode], NULL);
+        MeterTypeLabel* meterLabel = new MeterTypeLabel(module);
+        meterLabel->box.pos = Vec(39, 45);  // 2px gap after 23px switch box (14+23+2=39)
+        meterLabel->box.size = Vec(50, 6);
+        addChild(meterLabel);
+
+        // Add single rectangle switch in upper right corner
+        struct SimpleSwitch : widget::OpaqueWidget {
+            ChanIn* module = nullptr;
+            bool isHovered = false;
+            float currentOpacity = 0.5f;
+            double lastTime = 0.0;
+
+            void draw(const DrawArgs& args) override {
+                float x = 2.0f;
+                float y = 2.0f;
+                float size = 5.6f;
+
+                // Smooth opacity transition
+                float targetOpacity = isHovered ? 1.0f : 0.5f;
+                double currentTime = glfwGetTime();
+                if (lastTime == 0.0) lastTime = currentTime;
+                float deltaTime = (float)(currentTime - lastTime);
+                lastTime = currentTime;
+
+                // Transition speed: ~5 units per second (200ms transition time)
+                float transitionSpeed = 5.0f;
+                if (currentOpacity < targetOpacity) {
+                    currentOpacity = std::min(targetOpacity, currentOpacity + transitionSpeed * deltaTime);
+                } else if (currentOpacity > targetOpacity) {
+                    currentOpacity = std::max(targetOpacity, currentOpacity - transitionSpeed * deltaTime);
                 }
-            };
 
-            MeterTypeLabel* meterLabel = new MeterTypeLabel(module);
-            meterLabel->box.pos = Vec(39, 45);  // 2px gap after 23px switch box (14+23+2=39)
-            meterLabel->box.size = Vec(50, 6);
-            addChild(meterLabel);
+                float opacity = currentOpacity;
 
-            // Add single rectangle switch in upper right corner
-            struct SimpleSwitch : widget::OpaqueWidget {
-                ChanIn* module = nullptr;
-                bool isHovered = false;
-                float currentOpacity = 0.5f;
-                double lastTime = 0.0;
+                nvgBeginPath(args.vg);
+                nvgRoundedRect(args.vg, x, y, size, size, 1.0f);
 
-                void draw(const DrawArgs& args) override {
-                    float x = 2.0f;
-                    float y = 2.0f;
-                    float size = 5.6f;
+                // Get display enable state from module parameter
+                bool displayOn = module ? (module->params[ChanIn::DISPLAY_ENABLE_PARAM].getValue() > 0.5f) : true;
 
-                    // Smooth opacity transition
-                    float targetOpacity = isHovered ? 1.0f : 0.5f;
-                    double currentTime = glfwGetTime();
-                    if (lastTime == 0.0) lastTime = currentTime;
-                    float deltaTime = (float)(currentTime - lastTime);
-                    lastTime = currentTime;
+                // Fill with amber when display is enabled
+                if (displayOn) {
+                    nvgFillColor(args.vg, nvgRGBA(0xFF, 0xC0, 0x50, (int)(255 * opacity)));
+                    nvgFill(args.vg);
+                }
 
-                    // Transition speed: ~5 units per second (200ms transition time)
-                    float transitionSpeed = 5.0f;
-                    if (currentOpacity < targetOpacity) {
-                        currentOpacity = std::min(targetOpacity, currentOpacity + transitionSpeed * deltaTime);
-                    } else if (currentOpacity > targetOpacity) {
-                        currentOpacity = std::max(targetOpacity, currentOpacity - transitionSpeed * deltaTime);
-                    }
+                nvgStrokeColor(args.vg, nvgRGBA(100, 100, 100, (int)(255 * opacity)));
+                nvgStrokeWidth(args.vg, 0.5f);
+                nvgStroke(args.vg);
 
-                    float opacity = currentOpacity;
+                // Draw cross (X) when display is disabled
+                if (!displayOn) {
+                    nvgStrokeColor(args.vg, nvgRGBA(200, 200, 200, (int)(255 * opacity)));
+                    nvgStrokeWidth(args.vg, 0.8f);
 
+                    // Draw X - two diagonal lines
+                    float margin = 1.5f;
                     nvgBeginPath(args.vg);
-                    nvgRoundedRect(args.vg, x, y, size, size, 1.0f);
-
-                    // Get display enable state from module parameter
-                    bool displayOn = module ? (module->params[ChanIn::DISPLAY_ENABLE_PARAM].getValue() > 0.5f) : true;
-
-                    // Fill with amber when display is enabled
-                    if (displayOn) {
-                        nvgFillColor(args.vg, nvgRGBA(0xFF, 0xC0, 0x50, (int)(255 * opacity)));
-                        nvgFill(args.vg);
-                    }
-
-                    nvgStrokeColor(args.vg, nvgRGBA(100, 100, 100, (int)(255 * opacity)));
-                    nvgStrokeWidth(args.vg, 0.5f);
+                    nvgMoveTo(args.vg, x + margin, y + margin);
+                    nvgLineTo(args.vg, x + size - margin, y + size - margin);
+                    nvgMoveTo(args.vg, x + size - margin, y + margin);
+                    nvgLineTo(args.vg, x + margin, y + size - margin);
                     nvgStroke(args.vg);
-
-                    // Draw cross (X) when display is disabled
-                    if (!displayOn) {
-                        nvgStrokeColor(args.vg, nvgRGBA(200, 200, 200, (int)(255 * opacity)));
-                        nvgStrokeWidth(args.vg, 0.8f);
-
-                        // Draw X - two diagonal lines
-                        float margin = 1.5f;
-                        nvgBeginPath(args.vg);
-                        nvgMoveTo(args.vg, x + margin, y + margin);
-                        nvgLineTo(args.vg, x + size - margin, y + size - margin);
-                        nvgMoveTo(args.vg, x + size - margin, y + margin);
-                        nvgLineTo(args.vg, x + margin, y + size - margin);
-                        nvgStroke(args.vg);
-                    }
                 }
+            }
 
-                void onEnter(const EnterEvent& e) override {
-                    isHovered = true;
-                    OpaqueWidget::onEnter(e);
+            void onEnter(const EnterEvent& e) override {
+                isHovered = true;
+                OpaqueWidget::onEnter(e);
+            }
+
+            void onLeave(const LeaveEvent& e) override {
+                isHovered = false;
+                OpaqueWidget::onLeave(e);
+            }
+
+            void onButton(const ButtonEvent& e) override {
+                if (e.action == GLFW_PRESS && e.button == GLFW_MOUSE_BUTTON_LEFT && module) {
+                    // Toggle the display enable parameter
+                    float currentValue = module->params[ChanIn::DISPLAY_ENABLE_PARAM].getValue();
+                    module->params[ChanIn::DISPLAY_ENABLE_PARAM].setValue(currentValue > 0.5f ? 0.0f : 1.0f);
+
+                    e.consume(this);
                 }
+            }
+        };
 
-                void onLeave(const LeaveEvent& e) override {
-                    isHovered = false;
-                    OpaqueWidget::onLeave(e);
-                }
+        SimpleSwitch* simpleSwitch = new SimpleSwitch();
+        simpleSwitch->module = module;
+        simpleSwitch->box.pos = Vec(96, 43);
+        simpleSwitch->box.size = Vec(12, 12);
+        addChild(simpleSwitch);
 
-                void onButton(const ButtonEvent& e) override {
-                    if (e.action == GLFW_PRESS && e.button == GLFW_MOUSE_BUTTON_LEFT && module) {
-                        // Toggle the display enable parameter
-                        float currentValue = module->params[ChanIn::DISPLAY_ENABLE_PARAM].getValue();
-                        module->params[ChanIn::DISPLAY_ENABLE_PARAM].setValue(currentValue > 0.5f ? 0.0f : 1.0f);
+        // dB reference labels (5.0f font size matching ChanOut)
+        struct DbLabel : Widget {
+            const char* text;
+            DbLabel(const char* t) : text(t) {}
+            void draw(const DrawArgs& args) override {
+                nvgFontSize(args.vg, 5.0f);
+                nvgFontFaceId(args.vg, APP->window->uiFont->handle);
+                nvgTextAlign(args.vg, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE);
+                nvgFillColor(args.vg, nvgRGBA(0xff, 0xff, 0xff, 180));
+                nvgText(args.vg, 0, 0, text, NULL);
+            }
+        };
 
-                        e.consume(this);
-                    }
-                }
-            };
+        // Dynamic dB readout - centered below meters showing peak hold value
+        DynamicDbReadoutWidget* dbReadout = new DynamicDbReadoutWidget(module);
+        dbReadout->box.pos = Vec(16, 85);  // Centered on X-axis (16 + 88/2 = 60), centered in empty space
+        dbReadout->box.size = Vec(88, 10);
+        addChild(dbReadout);
 
-            SimpleSwitch* simpleSwitch = new SimpleSwitch();
-            simpleSwitch->module = module;
-            simpleSwitch->box.pos = Vec(96, 43);
-            simpleSwitch->box.size = Vec(12, 12);
-            addChild(simpleSwitch);
 
-            // dB reference labels (5.0f font size matching ChanOut)
-            struct DbLabel : Widget {
-                const char* text;
-                DbLabel(const char* t) : text(t) {}
-                void draw(const DrawArgs& args) override {
-                    nvgFontSize(args.vg, 5.0f);
-                    nvgFontFaceId(args.vg, APP->window->uiFont->handle);
-                    nvgTextAlign(args.vg, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE);
-                    nvgFillColor(args.vg, nvgRGBA(0xff, 0xff, 0xff, 180));
-                    nvgText(args.vg, 0, 0, text, NULL);
-                }
-            };
-
-            // Dynamic dB readout - centered below meters showing peak hold value
-            DynamicDbReadoutWidget* dbReadout = new DynamicDbReadoutWidget(module);
-            dbReadout->box.pos = Vec(16, 85);  // Centered on X-axis (16 + 88/2 = 60), centered in empty space
-            dbReadout->box.size = Vec(88, 10);
-            addChild(dbReadout);
-
-        }
     }
 
     void initVuMeterLights() {

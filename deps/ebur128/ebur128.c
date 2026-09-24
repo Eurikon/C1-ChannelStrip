@@ -118,12 +118,11 @@ static double histogram_energy_boundaries[1001];
 
 static interpolator*
 interp_create(unsigned int taps, unsigned int factor, unsigned int channels) {
-  int errcode; /* unused */
   interpolator* interp;
   unsigned int j;
 
   interp = (interpolator*) calloc(1, sizeof(interpolator));
-  CHECK_ERROR(!interp, 0, exit);
+  if (!interp) goto exit;
 
   interp->taps = taps;
   interp->factor = factor;
@@ -134,22 +133,22 @@ interp_create(unsigned int taps, unsigned int factor, unsigned int channels) {
    * One subfilter per interpolation factor. */
   interp->filter =
       (interp_filter*) calloc(interp->factor, sizeof(*interp->filter));
-  CHECK_ERROR(!interp->filter, 0, free_interp);
+  if (!interp->filter) goto free_interp;
 
   for (j = 0; j < interp->factor; j++) {
     interp->filter[j].index =
         (unsigned int*) calloc(interp->delay, sizeof(unsigned int));
     interp->filter[j].coeff = (double*) calloc(interp->delay, sizeof(double));
-    CHECK_ERROR(!interp->filter[j].index || !interp->filter[j].coeff, 0,
-                free_filter_index_coeff);
+    if (!interp->filter[j].index || !interp->filter[j].coeff)
+      goto free_filter_index_coeff;
   }
 
   /* One delay buffer per channel. */
   interp->z = (float**) calloc(interp->channels, sizeof(float*));
-  CHECK_ERROR(!interp->z, 0, free_filter_index_coeff);
+  if (!interp->z) goto free_filter_index_coeff;
   for (j = 0; j < interp->channels; j++) {
     interp->z[j] = (float*) calloc(interp->delay, sizeof(float));
-    CHECK_ERROR(!interp->z[j], 0, free_filter_z);
+    if (!interp->z[j]) goto free_filter_z;
   }
 
   /* Calculate the filter coefficients */
@@ -606,7 +605,7 @@ static void ebur128_check_true_peak(ebur128_state* st, size_t frames) {
 #define TURN_OFF_FTZ _mm_setcsr(mxcsr);
 #define FLUSH_MANUALLY
 #else
-#warning "manual FTZ is being used, please enable SSE2 (-msse2 -mfpmath=sse)"
+/* Non-SSE targets flush subnormal filter state explicitly. */
 #define TURN_ON_FTZ
 #define TURN_OFF_FTZ
 #define FLUSH_MANUALLY                                                         \
@@ -786,7 +785,7 @@ int ebur128_set_channel(ebur128_state* st,
   }
   if (value == EBUR128_DUAL_MONO &&
       (st->channels != 1 || channel_number != 0)) {
-    fprintf(stderr, "EBUR128_DUAL_MONO only works with mono files!\n");
+    fputs("EBUR128_DUAL_MONO only works with mono files!\n", stderr);
     return EBUR128_ERROR_INVALID_CHANNEL_INDEX;
   }
   st->d->channel_map[channel_number] = value;
@@ -920,6 +919,10 @@ int ebur128_set_max_window(ebur128_state* st, unsigned long window) {
   size_t new_audio_data_size;
   if (safe_size_mul(new_audio_data_frames, st->channels * sizeof(double),
                     &new_audio_data_size) != 0) {
+    return EBUR128_ERROR_NOMEM;
+  }
+
+  if (new_audio_data_size == 0) {
     return EBUR128_ERROR_NOMEM;
   }
 

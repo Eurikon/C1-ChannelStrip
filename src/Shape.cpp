@@ -53,10 +53,8 @@ struct LedRingOverlay : widget::TransparentWidget {
     }
 
     void draw(const DrawArgs& args) override {
-        if (!module) return;
-
         // Get parameter value and normalize to 0.0 to 1.0 range
-        ParamQuantity* pq = module->paramQuantities[paramId];
+        ParamQuantity* pq = module ? module->paramQuantities[paramId] : nullptr;
         float paramValue = pq ? pq->getScaledValue() : 0.0f;
 
         // LED ring specifications
@@ -475,8 +473,6 @@ struct GateWaveformWidget : OpaqueWidget {
     }
 
     void draw(const DrawArgs& args) override {
-        if (!_module) return;
-
         // Check if display is enabled via toggle switch
         bool isDisplayEnabled = displayEnabled.load();
 
@@ -536,7 +532,7 @@ struct GateWaveformWidget : OpaqueWidget {
         lastDrawTime = timeNow;
 
         // Smooth scroll offset (0.0 to 1.0) for sub-sample interpolation
-        float scrollSpeed = currentDecimation * 60.0f / APP->engine->getSampleRate(); // Pixels per second
+        float scrollSpeed = _module ? currentDecimation * 60.0f / APP->engine->getSampleRate() : 0.0f; // Pixels per second
         scrollOffset += scrollSpeed * deltaTime;
         if (scrollOffset >= 1.0f) scrollOffset -= 1.0f;
 
@@ -689,6 +685,10 @@ struct Shape : Module {
         configParam(PUNCH_PARAM, 0.f, 1.f, 0.0f, "Punch", "%", 0.f, 100.f);
         configParam(DISPLAY_ENABLE_PARAM, 0.0f, 1.0f, 1.0f, "Display Visibility");  // Default ON
 
+        for (ParamQuantity* quantity : paramQuantities) {
+            quantity->randomizeEnabled = false;
+        }
+
         configInput(LEFT_INPUT, "Left");
         configInput(RIGHT_INPUT, "Right");
         configInput(SIDECHAIN_INPUT, "Sidechain");
@@ -714,11 +714,6 @@ struct Shape : Module {
         std::this_thread::sleep_for(std::chrono::microseconds(100));
 
         // No complex operations, just ensure safe state
-    }
-
-    void onRandomize(const RandomizeEvent& e) override {
-        (void)e;  // Suppress unused parameter warning
-        // Disable randomize - do nothing
     }
 
     void onReset() override {
@@ -952,8 +947,6 @@ struct TimeSegmentSwitch : widget::OpaqueWidget {
     static constexpr uint8_t wave_b = 0x48;
 
     void draw(const DrawArgs& args) override {
-        if (!waveform) return;
-
         // Draw 4 rectangles
         for (int i = 0; i < 4; i++) {
             float x = (i * SWITCH_SPACING);
@@ -968,7 +961,7 @@ struct TimeSegmentSwitch : widget::OpaqueWidget {
             nvgStroke(args.vg);
 
             // Draw amber checkmark for active switch
-            if (i == waveform->currentTimeWindow) {
+            if (i == (waveform ? waveform->currentTimeWindow : 1)) {
                 nvgStrokeColor(args.vg, nvgRGBA(wave_r, wave_g, wave_b, 0xFF));
                 nvgStrokeWidth(args.vg, 1.2f);
                 nvgLineCap(args.vg, NVG_ROUND);
@@ -1141,7 +1134,7 @@ struct ShapeWidget : ModuleWidget {
         // VU Meter Labels using NanoVG (since SVG text doesn't render)
         struct VULabel : Widget {
             std::string text;
-            VULabel(std::string t) : text(t) {}
+            VULabel(const std::string& t) : text(t) {}
             void draw(const DrawArgs& args) override {
                 nvgFontSize(args.vg, 6.0f);
                 nvgTextAlign(args.vg, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE);
@@ -1433,10 +1426,8 @@ struct ShapeWidget : ModuleWidget {
             GateWaveformWidget* waveform;
             TimeSegmentLabel(GateWaveformWidget* w) : waveform(w) {}
             void draw(const DrawArgs& args) override {
-                if (!waveform) return;
-
                 const char* segmentNames[4] = {"BEAT", "ENV", "BAR", "PHRASE"};
-                int current = waveform->currentTimeWindow;
+                int current = waveform ? waveform->currentTimeWindow : 1;
                 current = clamp(current, 0, 3);
 
                 nvgFontSize(args.vg, 6.0f);

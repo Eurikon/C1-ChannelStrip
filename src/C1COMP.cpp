@@ -61,10 +61,8 @@ struct LedRingOverlay : widget::TransparentWidget {
     }
 
     void draw(const DrawArgs& args) override {
-        if (!module) return;
-
         // Get parameter value and normalize to 0.0 to 1.0 range
-        ParamQuantity* pq = module->paramQuantities[paramId];
+        ParamQuantity* pq = module ? module->paramQuantities[paramId] : nullptr;
         float paramValue = pq ? pq->getScaledValue() : 0.0f;
 
         // LED ring specifications
@@ -133,10 +131,8 @@ struct AttackLedRing : widget::TransparentWidget {
     }
 
     void draw(const DrawArgs& args) override {
-        if (!module) return;
-
         // Get parameter value (0.0 to 5.0)
-        ParamQuantity* pq = module->paramQuantities[paramId];
+        ParamQuantity* pq = module ? module->paramQuantities[paramId] : nullptr;
         float paramValue = pq ? pq->getValue() : 0.0f;
 
         // Get discrete position (0-5, already snapped by VCV Rack)
@@ -222,10 +218,8 @@ struct ReleaseLedRing : widget::TransparentWidget {
     }
 
     void draw(const DrawArgs& args) override {
-        if (!module) return;
-
         // Get parameter value (0.0 to 1.0)
-        ParamQuantity* pq = module->paramQuantities[paramId];
+        ParamQuantity* pq = module ? module->paramQuantities[paramId] : nullptr;
         float paramValue = pq ? pq->getScaledValue() : 0.0f;
 
         // LED ring specifications
@@ -768,7 +762,10 @@ struct C1COMP : Module {
 
         configParam(DISPLAY_ENABLE_PARAM, 0.f, 1.f, 1.f, "Display Enable");  // Display toggle (default: ON)
 
-        // I/O configuration
+        for (ParamQuantity* quantity : paramQuantities) {
+            quantity->randomizeEnabled = false;
+        }
+
         configInput(LEFT_INPUT, "Left");
         configInput(RIGHT_INPUT, "Right");
         configInput(SIDECHAIN_INPUT, "Sidechain");
@@ -810,11 +807,6 @@ struct C1COMP : Module {
             setCompressorType(compressorType);
             lastCompressorType = compressorType;
         }
-    }
-
-    void onRandomize(const RandomizeEvent& e) override {
-        (void)e;  // Suppress unused parameter warning
-        // Disable randomize - do nothing
     }
 
     void onSampleRateChange(const SampleRateChangeEvent& e) override {
@@ -1233,7 +1225,7 @@ struct C1COMPWidget : ModuleWidget {
         // VU Meter Labels using NanoVG (matching Shape module)
         struct VULabel : Widget {
             std::string text;
-            VULabel(std::string t) : text(t) {}
+            VULabel(const std::string& t) : text(t) {}
             void draw(const DrawArgs& args) override {
                 nvgFontSize(args.vg, 5.0f);
                 nvgTextAlign(args.vg, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE);
@@ -1270,7 +1262,7 @@ struct C1COMPWidget : ModuleWidget {
         // Control labels (matching CHAN-IN style)
         struct ControlLabel : Widget {
             std::string text;
-            ControlLabel(std::string t) : text(t) {}
+            ControlLabel(const std::string& t) : text(t) {}
             void draw(const DrawArgs& args) override {
                 std::shared_ptr<Font> sonoFont = APP->window->loadFont(asset::plugin(pluginInstance, "res/fonts/Sono/static/Sono_Proportional-Medium.ttf"));
                 nvgFontFaceId(args.vg, sonoFont->handle);
@@ -1452,10 +1444,8 @@ struct C1COMPWidget : ModuleWidget {
             C1COMP* module;
             CompressorTypeLabel(C1COMP* m) : module(m) {}
             void draw(const DrawArgs& args) override {
-                if (!module) return;
-
                 const char* typeNames[4] = {"VCA", "FET", "OPTICAL", "VARI-MU"};
-                int type = module->compressorType;
+                int type = module ? module->compressorType : 0;
                 type = clamp(type, 0, 3);
 
                 nvgFontSize(args.vg, 6.0f);

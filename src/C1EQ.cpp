@@ -63,10 +63,8 @@ struct LedRingOverlay : widget::TransparentWidget {
     }
 
     void draw(const DrawArgs& args) override {
-        if (!module) return;
-
         // Get parameter value and normalize to 0.0 to 1.0 range
-        ParamQuantity* pq = module->paramQuantities[paramId];
+        ParamQuantity* pq = module ? module->paramQuantities[paramId] : nullptr;
         float paramValue = pq ? pq->getScaledValue() : 0.0f;
 
         // LED ring specifications
@@ -135,9 +133,7 @@ struct LedRingOverlaySkip4 : widget::TransparentWidget {
     }
 
     void draw(const DrawArgs& args) override {
-        if (!module) return;
-
-        ParamQuantity* pq = module->paramQuantities[paramId];
+        ParamQuantity* pq = module ? module->paramQuantities[paramId] : nullptr;
         float paramValue = pq ? pq->getScaledValue() : 0.0f;
 
         // LED ring specifications (same as full ring)
@@ -1212,7 +1208,10 @@ struct C1EQ : Module {
         configParam<ModeParamQuantity>(B4_MODE_PARAM, 0.f, 2.f, 2.f, "High Mode");
         getParamQuantity(B4_MODE_PARAM)->snapEnabled = true;
 
-        // Configure inputs/outputs
+        for (ParamQuantity* quantity : paramQuantities) {
+            quantity->randomizeEnabled = false;
+        }
+
         configInput(AUDIO_INPUT_L, "Audio Left");
         configInput(AUDIO_INPUT_R, "Audio Right");
         configOutput(AUDIO_OUTPUT_L, "Audio Left");
@@ -1223,11 +1222,6 @@ struct C1EQ : Module {
         configBypass(AUDIO_INPUT_R, AUDIO_OUTPUT_R);
 
         lightDivider.setDivision(256);  // Update LEDs every 256 samples (187.5Hz at 48kHz)
-    }
-
-    void onRandomize(const RandomizeEvent& e) override {
-        (void)e;  // Suppress unused parameter warning
-        // Disable randomize - do nothing
     }
 
     void onReset() override {
@@ -2049,102 +2043,102 @@ struct C1EQWidget : ModuleWidget {
         addChild(createLightCentered<TinyLight<YellowLight>>(Vec(185, 140), module, C1EQ::B4_MODE_LIGHT + 2)); // Bottom - Shelf
 
         // Spectrum Display Widget - positioned in display area
+        SpectrumDisplayWidget* spectrumDisplay = createWidget<SpectrumDisplayWidget>(Vec(12, 41));
+        spectrumDisplay->box.size = Vec(201, 54);
+        spectrumDisplay->module = module;
         if (module) {
-            SpectrumDisplayWidget* spectrumDisplay = createWidget<SpectrumDisplayWidget>(Vec(12, 41));
-            spectrumDisplay->box.size = Vec(201, 54);
-            spectrumDisplay->module = module;
-            spectrumDisplay->engine = module->spectrumAnalyzer;
             module->spectrumAnalyzer = new EqAnalysisEngine();
             spectrumDisplay->engine = module->spectrumAnalyzer;
-            addChild(spectrumDisplay);
-
-            // Add screen toggle switch in upper right corner (same style as ChanIn/Shape)
-            struct SimpleSwitch : widget::OpaqueWidget {
-                C1EQ* module = nullptr;
-                bool isHovered = false;
-                float currentOpacity = 0.5f;
-                double lastTime = 0.0;
-
-                void draw(const DrawArgs& args) override {
-                    float x = 2.0f;
-                    float y = 2.0f;
-                    float size = 5.6f;
-
-                    // Smooth opacity transition
-                    float targetOpacity = isHovered ? 1.0f : 0.5f;
-                    double currentTime = glfwGetTime();
-                    if (lastTime == 0.0) lastTime = currentTime;
-                    float deltaTime = (float)(currentTime - lastTime);
-                    lastTime = currentTime;
-
-                    // Transition speed: ~5 units per second (200ms transition time)
-                    float transitionSpeed = 5.0f;
-                    if (currentOpacity < targetOpacity) {
-                        currentOpacity = std::min(targetOpacity, currentOpacity + transitionSpeed * deltaTime);
-                    } else if (currentOpacity > targetOpacity) {
-                        currentOpacity = std::max(targetOpacity, currentOpacity - transitionSpeed * deltaTime);
-                    }
-
-                    float opacity = currentOpacity;
-
-                    nvgBeginPath(args.vg);
-                    nvgRoundedRect(args.vg, x, y, size, size, 1.0f);
-
-                    // Get analyser enable state from module parameter
-                    bool analyserOn = module ? (module->params[C1EQ::ANALYSER_ENABLE_PARAM].getValue() > 0.5f) : true;
-
-                    // Fill with amber when analyser is enabled
-                    if (analyserOn) {
-                        nvgFillColor(args.vg, nvgRGBA(0xFF, 0xC0, 0x50, (int)(255 * opacity)));
-                        nvgFill(args.vg);
-                    }
-
-                    nvgStrokeColor(args.vg, nvgRGBA(100, 100, 100, (int)(255 * opacity)));
-                    nvgStrokeWidth(args.vg, 0.5f);
-                    nvgStroke(args.vg);
-
-                    // Draw cross (X) when analyser is disabled
-                    if (!analyserOn) {
-                        nvgStrokeColor(args.vg, nvgRGBA(200, 200, 200, (int)(255 * opacity)));
-                        nvgStrokeWidth(args.vg, 0.8f);
-
-                        // Draw X - two diagonal lines
-                        float margin = 1.5f;
-                        nvgBeginPath(args.vg);
-                        nvgMoveTo(args.vg, x + margin, y + margin);
-                        nvgLineTo(args.vg, x + size - margin, y + size - margin);
-                        nvgMoveTo(args.vg, x + size - margin, y + margin);
-                        nvgLineTo(args.vg, x + margin, y + size - margin);
-                        nvgStroke(args.vg);
-                    }
-                }
-
-                void onEnter(const EnterEvent& e) override {
-                    isHovered = true;
-                    OpaqueWidget::onEnter(e);
-                }
-
-                void onLeave(const LeaveEvent& e) override {
-                    isHovered = false;
-                    OpaqueWidget::onLeave(e);
-                }
-
-                void onButton(const ButtonEvent& e) override {
-                    if (e.action == GLFW_PRESS && e.button == GLFW_MOUSE_BUTTON_LEFT && module) {
-                        // Toggle the analyser enable parameter
-                        float currentValue = module->params[C1EQ::ANALYSER_ENABLE_PARAM].getValue();
-                        module->params[C1EQ::ANALYSER_ENABLE_PARAM].setValue(currentValue > 0.5f ? 0.0f : 1.0f);
-                        e.consume(this);
-                    }
-                }
-            };
-
-            SimpleSwitch* simpleSwitch = new SimpleSwitch();
-            simpleSwitch->module = module;
-            simpleSwitch->box.pos = Vec(201, 43);  // Upper right corner, nudged left 4px
-            simpleSwitch->box.size = Vec(12, 12);
-            addChild(simpleSwitch);
         }
+        addChild(spectrumDisplay);
+
+        // Add screen toggle switch in upper right corner (same style as ChanIn/Shape)
+        struct SimpleSwitch : widget::OpaqueWidget {
+            C1EQ* module = nullptr;
+            bool isHovered = false;
+            float currentOpacity = 0.5f;
+            double lastTime = 0.0;
+
+            void draw(const DrawArgs& args) override {
+                float x = 2.0f;
+                float y = 2.0f;
+                float size = 5.6f;
+
+                // Smooth opacity transition
+                float targetOpacity = isHovered ? 1.0f : 0.5f;
+                double currentTime = glfwGetTime();
+                if (lastTime == 0.0) lastTime = currentTime;
+                float deltaTime = (float)(currentTime - lastTime);
+                lastTime = currentTime;
+
+                // Transition speed: ~5 units per second (200ms transition time)
+                float transitionSpeed = 5.0f;
+                if (currentOpacity < targetOpacity) {
+                    currentOpacity = std::min(targetOpacity, currentOpacity + transitionSpeed * deltaTime);
+                } else if (currentOpacity > targetOpacity) {
+                    currentOpacity = std::max(targetOpacity, currentOpacity - transitionSpeed * deltaTime);
+                }
+
+                float opacity = currentOpacity;
+
+                nvgBeginPath(args.vg);
+                nvgRoundedRect(args.vg, x, y, size, size, 1.0f);
+
+                // Get analyser enable state from module parameter
+                bool analyserOn = module ? (module->params[C1EQ::ANALYSER_ENABLE_PARAM].getValue() > 0.5f) : true;
+
+                // Fill with amber when analyser is enabled
+                if (analyserOn) {
+                    nvgFillColor(args.vg, nvgRGBA(0xFF, 0xC0, 0x50, (int)(255 * opacity)));
+                    nvgFill(args.vg);
+                }
+
+                nvgStrokeColor(args.vg, nvgRGBA(100, 100, 100, (int)(255 * opacity)));
+                nvgStrokeWidth(args.vg, 0.5f);
+                nvgStroke(args.vg);
+
+                // Draw cross (X) when analyser is disabled
+                if (!analyserOn) {
+                    nvgStrokeColor(args.vg, nvgRGBA(200, 200, 200, (int)(255 * opacity)));
+                    nvgStrokeWidth(args.vg, 0.8f);
+
+                    // Draw X - two diagonal lines
+                    float margin = 1.5f;
+                    nvgBeginPath(args.vg);
+                    nvgMoveTo(args.vg, x + margin, y + margin);
+                    nvgLineTo(args.vg, x + size - margin, y + size - margin);
+                    nvgMoveTo(args.vg, x + size - margin, y + margin);
+                    nvgLineTo(args.vg, x + margin, y + size - margin);
+                    nvgStroke(args.vg);
+                }
+            }
+
+            void onEnter(const EnterEvent& e) override {
+                isHovered = true;
+                OpaqueWidget::onEnter(e);
+            }
+
+            void onLeave(const LeaveEvent& e) override {
+                isHovered = false;
+                OpaqueWidget::onLeave(e);
+            }
+
+            void onButton(const ButtonEvent& e) override {
+                if (e.action == GLFW_PRESS && e.button == GLFW_MOUSE_BUTTON_LEFT && module) {
+                    // Toggle the analyser enable parameter
+                    float currentValue = module->params[C1EQ::ANALYSER_ENABLE_PARAM].getValue();
+                    module->params[C1EQ::ANALYSER_ENABLE_PARAM].setValue(currentValue > 0.5f ? 0.0f : 1.0f);
+                    e.consume(this);
+                }
+            }
+        };
+
+        SimpleSwitch* simpleSwitch = new SimpleSwitch();
+        simpleSwitch->module = module;
+        simpleSwitch->box.pos = Vec(201, 43);  // Upper right corner, nudged left 4px
+        simpleSwitch->box.size = Vec(12, 12);
+        addChild(simpleSwitch);
+
 
         // NanoVG text labels (TC house style)
         addTextLabels();
@@ -2267,10 +2261,8 @@ struct C1EQWidget : ModuleWidget {
             OsLabel(C1EQ* m) : module(m) {}
 
             void draw(const DrawArgs& args) override {
-                if (!module) return;
-
                 // Only draw when oversample is OFF (parameter value <= 0.5)
-                if (module->params[C1EQ::OVERSAMPLE_PARAM].getValue() > 0.5f) {
+                if (module && module->params[C1EQ::OVERSAMPLE_PARAM].getValue() > 0.5f) {
                     return; // Don't draw when oversample is ON
                 }
 
@@ -2318,7 +2310,7 @@ struct C1EQWidget : ModuleWidget {
     void addBandLabel(const char* text, float x, float y) {
         struct BandLabel : Widget {
             std::string labelText;
-            BandLabel(std::string t) : labelText(t) {}
+            BandLabel(const std::string& t) : labelText(t) {}
             void draw(const DrawArgs& args) override {
                 std::shared_ptr<Font> sonoFont = APP->window->loadFont(asset::plugin(pluginInstance, "res/fonts/Sono/static/Sono_Proportional-Bold.ttf"));
                 nvgFontFaceId(args.vg, sonoFont->handle);
@@ -2349,7 +2341,7 @@ struct C1EQWidget : ModuleWidget {
     void addParamLabel(const char* text, float x, float y) {
         struct ParamLabel : Widget {
             std::string labelText;
-            ParamLabel(std::string t) : labelText(t) {}
+            ParamLabel(const std::string& t) : labelText(t) {}
             void draw(const DrawArgs& args) override {
                 std::shared_ptr<Font> sonoFont = APP->window->loadFont(asset::plugin(pluginInstance, "res/fonts/Sono/static/Sono_Proportional-Medium.ttf"));
                 nvgFontFaceId(args.vg, sonoFont->handle);
@@ -2380,7 +2372,7 @@ struct C1EQWidget : ModuleWidget {
     void addVerticalLabel(const char* text, float x, float y) {
         struct VerticalLabel : Widget {
             std::string labelText;
-            VerticalLabel(std::string t) : labelText(t) {}
+            VerticalLabel(const std::string& t) : labelText(t) {}
             void draw(const DrawArgs& args) override {
                 std::shared_ptr<Font> sonoFont = APP->window->loadFont(asset::plugin(pluginInstance, "res/fonts/Sono/static/Sono_Proportional-Medium.ttf"));
                 nvgFontFaceId(args.vg, sonoFont->handle);

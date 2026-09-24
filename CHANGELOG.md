@@ -2,6 +2,17 @@
 
 ---
 
+## Version 2.1.6 - 24-09-2026
+
+### Fixed
+
+- Bounded CHAN-OUT downsampling writes and block processing; invalid saved oversampling settings fall back to 2×.
+- Rendered meter backgrounds, labels, LED rings, and the EQ display in module-browser previews.
+- Preserved disabled randomization through Rack parameter settings.
+- Initialized CHAN-IN expander buffers and resolved Cppcheck, Clang analyzer, and vendored-library compiler warnings.
+
+---
+
 ## Version 2.1.5 - 21-09-2026
 
 ### Changed

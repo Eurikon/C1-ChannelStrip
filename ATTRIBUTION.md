@@ -3,8 +3,8 @@
 This document provides complete attribution and provenance documentation for all code, algorithms, and design elements in the C1-ChannelStrip VCV Rack plugin. </br>
 The project is licensed under GPL-3.0-or-later and builds upon excellent GPL-3.0 licensed work from the VCV Rack community. </br> </br>
 
-**Plugin Version**: 2.1.5 </br>
-**Date**: 21-09-2026 </br>
+**Plugin Version**: 2.1.6 </br>
+**Date**: 24-09-2026 </br>
 **Copyright**: © 2025 Twisted Cable </br>
 **License**: GPL-3.0-or-later </br>
 
@@ -180,6 +180,8 @@ The project is licensed under GPL-3.0-or-later and builds upon excellent GPL-3.0
 - **Components**: EBU R128 compliant loudness measurement library
 - **Usage**: Momentary loudness measurement (400ms sliding window) for professional broadcast-standard LUFS metering
 - **Compatibility**: MIT License is compatible with GPL-3.0-or-later
+
+- **Local changes (24-09-2026)**: Reject zero-sized window allocations, simplify interpolator allocation failure paths, use fixed-string error output, and retain manual subnormal flushing on non-SSE targets without an x86-only compiler warning.
 
 **MIT License Text**:
 ```

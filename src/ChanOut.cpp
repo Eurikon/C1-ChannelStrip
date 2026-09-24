@@ -70,10 +70,8 @@ struct LedRingOverlay : widget::TransparentWidget {
     }
 
     void draw(const DrawArgs& args) override {
-        if (!module) return;
-
         // Get parameter value and normalize to 0.0 to 1.0 range
-        ParamQuantity* pq = module->paramQuantities[paramId];
+        ParamQuantity* pq = module ? module->paramQuantities[paramId] : nullptr;
         float paramValue = pq ? pq->getScaledValue() : 0.0f;
 
         // LED ring specifications (matching Console1MIDI)
@@ -277,8 +275,6 @@ struct LUFSMeterDisplay : widget::TransparentWidget {
     }
 
     void draw(const DrawArgs& args) override {
-        if (!module) return;
-
         // Background bar (same styling as RMS/VU/PPM)
         nvgFillColor(args.vg, nvgRGBA(bg_r, bg_g, bg_b, 255));
         nvgBeginPath(args.vg);
@@ -594,7 +590,10 @@ struct ChanOut : rack::engine::Module, IChanOutMode {
         configParam<MuteParamQuantity>(MUTE_BUTTON_PARAM, 0.f, 1.f, 0.f, "Mute");
         configParam(DISPLAY_ENABLE_PARAM, 0.f, 1.f, 1.f, "Display Enable");
 
-        // I/O configuration
+        for (ParamQuantity* quantity : paramQuantities) {
+            quantity->randomizeEnabled = false;
+        }
+
         configInput(LEFT_INPUT, "Left");
         configInput(RIGHT_INPUT, "Right");
         configOutput(LEFT_OUTPUT, "Left");
@@ -626,11 +625,6 @@ struct ChanOut : rack::engine::Module, IChanOutMode {
         // Signal shutdown and null widget pointer for thread safety
         isShuttingDown.store(true);
         lufsMeter.store(nullptr);
-    }
-
-    void onRandomize(const RandomizeEvent& e) override {
-        (void)e;  // Suppress unused parameter warning
-        // Disable randomize - do nothing
     }
 
     void onReset() override {
@@ -730,20 +724,23 @@ struct ChanOut : rack::engine::Module, IChanOutMode {
 
         json_t* oversampleFactorJ = json_object_get(rootJ, "oversampleFactor");
         if (oversampleFactorJ) {
-            oversampleFactor = json_integer_value(oversampleFactorJ);
+            json_int_t factor = json_integer_value(oversampleFactorJ);
+            oversampleFactor = (factor == 1 || factor == 2 || factor == 4 || factor == 8) ? static_cast<int>(factor) : 2;
             apiEngine.engineL.setOversampleFactor(oversampleFactor);
             apiEngine.engineR.setOversampleFactor(oversampleFactor);
         }
 
         json_t* neveOversampleFactorJ = json_object_get(rootJ, "neveOversampleFactor");
         if (neveOversampleFactorJ) {
-            neveOversampleFactor = json_integer_value(neveOversampleFactorJ);
+            json_int_t factor = json_integer_value(neveOversampleFactorJ);
+            neveOversampleFactor = (factor == 1 || factor == 2 || factor == 4 || factor == 8) ? static_cast<int>(factor) : 2;
             neveEngine.setOversampleFactor(neveOversampleFactor);
         }
 
         json_t* dangerousOversampleFactorJ = json_object_get(rootJ, "dangerousOversampleFactor");
         if (dangerousOversampleFactorJ) {
-            dangerousOversampleFactor = json_integer_value(dangerousOversampleFactorJ);
+            json_int_t factor = json_integer_value(dangerousOversampleFactorJ);
+            dangerousOversampleFactor = (factor == 1 || factor == 2 || factor == 4 || factor == 8) ? static_cast<int>(factor) : 2;
             dangerousEngine.setOversampleFactor(dangerousOversampleFactor);
         }
 
@@ -1497,10 +1494,8 @@ struct ChanOutWidget : ModuleWidget {
             ChanOut* module;
             CharacterEngineLabel(ChanOut* m) : module(m) {}
             void draw(const DrawArgs& args) override {
-                if (!module) return;
-
                 const char* engineNames[4] = {"STANDARD", "2520", "8816", "DM2+"};
-                int engine = module->characterEngine;
+                int engine = module ? module->characterEngine : 0;
                 engine = clamp(engine, 0, 3);
 
                 nvgFontSize(args.vg, 6.0f);
@@ -1612,7 +1607,7 @@ struct ChanOutWidget : ModuleWidget {
         // Control labels (matching CHAN-IN style)
         struct ControlLabel : Widget {
             std::string text;
-            ControlLabel(std::string t) : text(t) {}
+            ControlLabel(const std::string& t) : text(t) {}
             void draw(const DrawArgs& args) override {
                 std::shared_ptr<Font> sonoFont = APP->window->loadFont(asset::plugin(pluginInstance, "res/fonts/Sono/static/Sono_Proportional-Medium.ttf"));
                 nvgFontFaceId(args.vg, sonoFont->handle);

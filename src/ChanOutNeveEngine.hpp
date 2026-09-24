@@ -54,7 +54,7 @@ static inline double clampd(double x, double a, double b) {
 class BufferedPolyphaseSIMD {
 public:
     BufferedPolyphaseSIMD(int factor = 8, int tapsPerPhase = 64)
-    : factor_(std::max(1, factor)), tapsPerPhase_(std::max(8, tapsPerPhase)) {
+    : factor_((factor == 1 || factor == 2 || factor == 4 || factor == 8) ? factor : 2), tapsPerPhase_(std::max(8, tapsPerPhase)) {
         buildKernel();
         setFactor(factor_);
         ring_.assign(tapsPerPhase_ + 8, 0.0);
@@ -62,7 +62,7 @@ public:
     }
 
     void setFactor(int f) {
-        factor_ = std::max(1, f);
+        factor_ = (f == 1 || f == 2 || f == 4 || f == 8) ? f : 2;
         buildPolyphase();
     }
 
@@ -121,13 +121,9 @@ public:
         }
     }
 
-    void processDown(const double* in, size_t inLen, double* out) {
-        if (factor_ == 1) { for (size_t i = 0; i < inLen; ++i) out[i] = in[i]; return; }
-        // Proper decimation: keep every Nth sample (phase 0 only)
-        // The anti-aliasing was already applied during processUp
-        size_t outN = inLen / factor_;
-        for (size_t i = 0; i < outN; ++i) {
-            out[i] = in[i * factor_];  // Take phase 0 sample only
+    void processDown(const double* in, size_t outLen, double* out) {
+        for (size_t i = 0; i < outLen; ++i) {
+            out[i] = in[i * factor_];
         }
     }
 
@@ -246,7 +242,7 @@ private:
 class NEVE8816_Engine_Pro_SIMD_v3 {
 public:
     NEVE8816_Engine_Pro_SIMD_v3(double sampleRate = 44100.0, int oversampleFactor = 8)
-    : oversampler_(oversampleFactor, 64), oversampleFactor_(oversampleFactor) {
+    : oversampler_(oversampleFactor, 64), oversampleFactor_((oversampleFactor == 1 || oversampleFactor == 2 || oversampleFactor == 4 || oversampleFactor == 8) ? oversampleFactor : 2) {
         fs_ = sampleRate;
         init();
     }
@@ -280,7 +276,7 @@ public:
     }
 
     void setOversampleFactor(int f) {
-        oversampleFactor_ = std::max(1, f);
+        oversampleFactor_ = (f == 1 || f == 2 || f == 4 || f == 8) ? f : 2;
         oversampler_.setFactor(oversampleFactor_);
     }
 
@@ -305,6 +301,15 @@ public:
         if (oversampleFactor_ == 1) {
             for (size_t i = 0; i < N; ++i)
                 out[i] = processSampleInternal(in[i]);
+            return;
+        }
+
+        if (N > upsampleBuffer_.size() / oversampleFactor_) {
+            for (size_t offset = 0; offset < N;) {
+                size_t count = std::min(N - offset, upsampleBuffer_.size() / oversampleFactor_);
+                processBlock(in + offset, out + offset, count);
+                offset += count;
+            }
             return;
         }
 
@@ -353,7 +358,7 @@ public:
             upsampleBuffer_[i] = y;
         }
 
-        oversampler_.processDown(upsampleBuffer_.data(), M, out);
+        oversampler_.processDown(upsampleBuffer_.data(), N, out);
     }
 
     double processSample(double xin) {
@@ -474,7 +479,7 @@ struct NeveEngine {
     }
 
     void setOversampleFactor(int f) {
-        oversampleFactor = f;
+        oversampleFactor = (f == 1 || f == 2 || f == 4 || f == 8) ? f : 2;
         engineL.setOversampleFactor(f);
         engineR.setOversampleFactor(f);
     }
